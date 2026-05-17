@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block title %}Услуги — {{ BRAND_NAME }}{% endblock %}
+{% block content %}
+<div class="flex items-center justify-between mb-6">
+  <h1 class="text-3xl font-bold">Управление услугами</h1>
+  <a href="/admin/services/service/add/" class="brand-gradient text-white text-sm px-4 py-2 rounded-lg">+ Добавить услугу</a>
+</div>
+<div class="bg-white rounded-2xl border border-gray-100 overflow-x-auto">
+  <table class="w-full text-sm">
+    <thead class="bg-gray-50 text-gray-600 text-left">
+      <tr>
+        <th class="px-4 py-2">Категория</th><th>Услуга</th><th>Длительность</th><th>Цена</th><th>Активна</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for s in services %}
+        <tr class="border-t border-gray-50">
+          <td class="px-4 py-2">{{ s.category.icon_emoji }} {{ s.category.name }}</td>
+          <td class="font-medium">{{ s.name }}</td>
+          <td>{{ s.duration_minutes }} мин</td>
+          <td class="text-indigo-600 font-semibold">{{ s.price|floatformat:0 }} ₽</td>
+          <td>{% if s.is_active %}<span class="text-emerald-600">Да</span>{% else %}<span class="text-rose-600">Нет</span>{% endif %}</td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="5" class="px-4 py-6 text-center text-gray-400">Услуг ещё нет</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

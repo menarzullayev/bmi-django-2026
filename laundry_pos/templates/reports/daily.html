@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% block title %}Отчёт за день{% endblock %}
+{% block content %}
+<div class="flex items-center justify-between mb-4">
+  <h1 class="text-2xl font-extrabold flex items-center gap-2"><i data-lucide="bar-chart-3" class="w-7 h-7 text-cyan-700"></i> Отчёт за день</h1>
+  <form method="get" class="flex gap-2 items-end">
+    <div><label class="text-xs font-semibold uppercase text-slate-500">Дата</label><input class="input" type="date" name="date" value="{{ date|date:'Y-m-d' }}"></div>
+    <button class="btn btn-primary"><i data-lucide="refresh-ccw" class="w-4 h-4"></i> Показать</button>
+  </form>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+  <div class="card"><div class="text-xs uppercase text-slate-500">Квитанций</div><div class="text-3xl font-extrabold text-cyan-700 mt-1">{{ tickets_count }}</div></div>
+  <div class="card"><div class="text-xs uppercase text-slate-500">Сумма по квитанциям</div><div class="text-3xl font-extrabold text-slate-700 mt-1">{{ tickets_subtotal|floatformat:0 }}</div></div>
+  <div class="card"><div class="text-xs uppercase text-slate-500">Принято оплат</div><div class="text-3xl font-extrabold text-emerald-600 mt-1">{{ payments_total|floatformat:0 }}</div></div>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+  <div class="card">
+    <h3 class="font-bold mb-2">По статусам</h3>
+    <ul class="text-sm space-y-1">
+      {% for s in by_status %}<li class="flex justify-between border-b last:border-0 py-1"><span>{{ s.label }}</span><b>{{ s.count }}</b></li>{% empty %}<li class="text-slate-400">—</li>{% endfor %}
+    </ul>
+  </div>
+  <div class="card">
+    <h3 class="font-bold mb-2">По методам оплаты</h3>
+    <ul class="text-sm space-y-1">
+      {% for m in by_method %}<li class="flex justify-between border-b last:border-0 py-1"><span>{{ m.label }} ({{ m.count }})</span><b>{{ m.sum|floatformat:0 }}</b></li>{% empty %}<li class="text-slate-400">—</li>{% endfor %}
+    </ul>
+  </div>
+  <div class="card">
+    <h3 class="font-bold mb-2">По кассирам</h3>
+    <ul class="text-sm space-y-1">
+      {% for c in by_cashier %}<li class="flex justify-between border-b last:border-0 py-1"><span>{{ c.name }} ({{ c.count }})</span><b>{{ c.sum|floatformat:0 }}</b></li>{% empty %}<li class="text-slate-400">—</li>{% endfor %}
+    </ul>
+  </div>
+</div>
+
+<div class="card">
+  <h3 class="font-bold mb-3">Оплаты за день</h3>
+  <table class="w-full text-sm">
+    <thead><tr class="text-left text-xs uppercase text-slate-500 border-b"><th class="py-2">Время</th><th>Квитанция</th><th>Метод</th><th>Кассир</th><th class="text-right">Сумма</th></tr></thead>
+    <tbody>
+      {% for p in payments %}
+      <tr class="border-b last:border-0">
+        <td class="py-1 text-xs">{{ p.paid_at|date:"H:i" }}</td>
+        <td class="font-mono text-xs">{{ p.ticket.ticket_number }}</td>
+        <td>{{ p.get_method_display }}</td>
+        <td class="text-xs">{{ p.cashier.display_name }}</td>
+        <td class="text-right font-semibold">{{ p.amount|floatformat:0 }}</td>
+      </tr>
+      {% empty %}<tr><td colspan="5" class="py-4 text-center text-slate-400">Нет оплат</td></tr>{% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

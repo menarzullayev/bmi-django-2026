@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block title %}Услуги — {{ BRAND_NAME }}{% endblock %}
+{% block content %}
+<h1 class="text-3xl font-bold mb-6">Услуги</h1>
+
+<div class="flex flex-wrap gap-2 mb-6">
+  <a href="{% url 'services:list' %}" class="px-4 py-2 rounded-full text-sm border {% if not active_category %}brand-gradient text-white border-transparent{% else %}border-gray-200 text-gray-700 bg-white{% endif %}">Все</a>
+  {% for c in categories %}
+    <a href="?cat={{ c.slug }}" class="px-4 py-2 rounded-full text-sm border {% if active_category == c.slug %}brand-gradient text-white border-transparent{% else %}border-gray-200 text-gray-700 bg-white{% endif %}">{{ c.icon_emoji }} {{ c.name }}</a>
+  {% endfor %}
+</div>
+
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+  {% for s in services %}
+    <div class="bg-white rounded-2xl p-5 border border-gray-100 hover:shadow-md transition">
+      <div class="text-2xl mb-2">{{ s.category.icon_emoji }}</div>
+      <div class="text-xs text-gray-500 mb-1">{{ s.category.name }}</div>
+      <h3 class="font-semibold text-lg mb-1">{{ s.name }}</h3>
+      <p class="text-sm text-gray-600 mb-3">{{ s.description|default:'Профессиональная услуга.'|truncatechars:100 }}</p>
+      <div class="flex items-center justify-between mb-3">
+        <span class="text-sm text-gray-700">{{ s.duration_minutes }} мин</span>
+        <span class="font-semibold text-indigo-600">{{ s.price|floatformat:0 }} ₽</span>
+      </div>
+      <a href="{% url 'bookings:calendar' %}?service={{ s.id }}" class="block text-center brand-gradient text-white rounded-lg py-2 text-sm font-medium">Записаться</a>
+    </div>
+  {% empty %}
+    <p class="text-gray-500 col-span-full">Услуг пока нет.</p>
+  {% endfor %}
+</div>
+{% endblock %}

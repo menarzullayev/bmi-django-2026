@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% block title %}Чек {{ ticket.ticket_number }}{% endblock %}
+{% block extra_head %}
+<style>
+  @media print {
+    body { background:white !important; }
+    .receipt { box-shadow:none; }
+  }
+  .receipt { font-family: 'Courier New', monospace; }
+  .dashed { border-top: 1px dashed #94a3b8; margin: .5rem 0; }
+</style>
+{% endblock %}
+{% block content %}
+<div class="max-w-sm mx-auto">
+  <div class="card receipt text-sm">
+    <div class="text-center">
+      <div class="font-extrabold text-lg">ХИМЧИСТКА POS</div>
+      <div class="text-xs">Квитанция-чек</div>
+    </div>
+    <div class="dashed"></div>
+    <div class="text-center font-bold">№ {{ ticket.ticket_number }}</div>
+    <div class="text-xs">Принято: {{ ticket.received_at|date:"d.m.Y H:i" }}</div>
+    <div class="text-xs">Кассир: {{ ticket.cashier.display_name }}</div>
+    <div class="dashed"></div>
+    <div>Клиент: {{ ticket.customer.full_name }}</div>
+    <div class="text-xs">Тел.: {{ ticket.customer.phone }}</div>
+    {% if ticket.pickup_method == 'delivery' %}<div class="text-xs">Доставка: {{ ticket.delivery_address }}</div>{% endif %}
+    <div class="dashed"></div>
+    <div class="font-bold">ВЕЩИ:</div>
+    {% for g in ticket.garments.all %}
+    <div class="flex justify-between">
+      <span>{{ g.cloth_type.name }} — {{ g.service_type.name }}</span>
+      <span>{{ g.price|floatformat:0 }}</span>
+    </div>
+    {% if g.color or g.brand %}<div class="text-xs text-slate-500 pl-2">{{ g.color }} {{ g.brand }}</div>{% endif %}
+    {% endfor %}
+    <div class="dashed"></div>
+    <div class="flex justify-between"><span>Подытог:</span><span>{{ ticket.subtotal|floatformat:0 }}</span></div>
+    {% if ticket.discount %}<div class="flex justify-between"><span>Скидка:</span><span>−{{ ticket.discount|floatformat:0 }}</span></div>{% endif %}
+    <div class="flex justify-between font-bold text-base"><span>ИТОГО:</span><span>{{ ticket.total|floatformat:0 }}</span></div>
+    <div class="flex justify-between"><span>Оплачено:</span><span>{{ ticket.amount_paid|floatformat:0 }}</span></div>
+    <div class="flex justify-between font-bold"><span>К доплате:</span><span>{{ ticket.balance_due|floatformat:0 }}</span></div>
+    <div class="dashed"></div>
+    <div>Статус: <b>{{ ticket.get_status_display }}</b></div>
+    {% if ticket.ready_by %}<div class="text-xs">Готово к: {{ ticket.ready_by|date:"d.m.Y H:i" }}</div>{% endif %}
+    {% if ticket.qr_image %}
+    <div class="dashed"></div>
+    <div class="text-center"><img src="{{ ticket.qr_image.url }}" class="w-32 h-32 inline-block" alt="QR"></div>
+    {% endif %}
+    <div class="dashed"></div>
+    <div class="text-center font-bold">Спасибо за заказ!</div>
+    <div class="text-center text-xs">Тел.: +998 71 123-45-67</div>
+  </div>
+  <div class="no-print mt-3 flex gap-2 justify-center">
+    <button onclick="window.print()" class="btn btn-primary"><i data-lucide="printer" class="w-4 h-4"></i> Печать</button>
+    <a href="{% url 'tickets:receipt_pdf' ticket.pk %}" target="_blank" class="btn btn-ghost"><i data-lucide="file-text" class="w-4 h-4"></i> PDF</a>
+    <a href="{% url 'tickets:detail' ticket.pk %}" class="btn btn-ghost"><i data-lucide="arrow-left" class="w-4 h-4"></i> Назад</a>
+  </div>
+</div>
+{% endblock %}

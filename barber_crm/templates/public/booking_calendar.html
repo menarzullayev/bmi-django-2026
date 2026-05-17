@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block title %}Запись — {{ BRAND_NAME }}{% endblock %}
+{% block content %}
+<h1 class="text-3xl font-bold mb-6">Онлайн-запись</h1>
+
+<form class="bg-white rounded-2xl p-6 border border-gray-100 grid gap-4 sm:grid-cols-3"
+      hx-get="{% url 'bookings:slots' %}" hx-trigger="change" hx-target="#slots" hx-include="closest form">
+  <div>
+    <label class="block text-sm font-medium text-gray-700 mb-1">Услуга</label>
+    <select name="service" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm">
+      <option value="">— выберите услугу —</option>
+      {% for s in services %}
+        <option value="{{ s.id }}" {% if request.GET.service == s.id|stringformat:'s' %}selected{% endif %}>{{ s.category.icon_emoji }} {{ s.name }} · {{ s.duration_minutes }} мин · {{ s.price|floatformat:0 }} ₽</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div>
+    <label class="block text-sm font-medium text-gray-700 mb-1">Мастер</label>
+    <select name="barber" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm">
+      <option value="">— выберите мастера —</option>
+      {% for b in barbers %}
+        <option value="{{ b.id }}">{{ b.full_name }} · ★ {{ b.rating }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div>
+    <label class="block text-sm font-medium text-gray-700 mb-1">Дата</label>
+    <input type="date" name="date" value="{{ today }}" min="{{ min_date }}" max="{{ max_date }}"
+           class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm">
+  </div>
+</form>
+
+<div class="mt-8">
+  <h2 class="text-xl font-semibold mb-3">Свободное время</h2>
+  <div id="slots" class="bg-white rounded-2xl p-6 border border-gray-100 min-h-[100px]">
+    <p class="text-gray-500 text-sm">Выберите услугу, мастера и дату — появятся свободные слоты.</p>
+  </div>
+</div>
+{% endblock %}

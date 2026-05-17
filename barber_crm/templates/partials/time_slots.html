@@ -1,0 +1,16 @@
+{% if message %}
+  <p class="text-gray-500 text-sm">{{ message }}</p>
+{% elif slots %}
+  <div class="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-7 gap-2">
+    {% for s in slots %}
+      {% if s.available %}
+        <a href="{% url 'bookings:confirm' service.id barber.id s.iso %}"
+           class="text-center py-2 rounded-lg border border-indigo-200 bg-indigo-50 text-indigo-700 font-medium hover:bg-indigo-100">{{ s.label }}</a>
+      {% else %}
+        <span class="text-center py-2 rounded-lg border border-gray-100 bg-gray-50 text-gray-300 line-through">{{ s.label }}</span>
+      {% endif %}
+    {% endfor %}
+  </div>
+{% else %}
+  <p class="text-gray-500 text-sm">Свободного времени не найдено.</p>
+{% endif %}

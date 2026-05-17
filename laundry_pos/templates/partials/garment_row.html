@@ -1,0 +1,44 @@
+{% load static %}
+<tr class="border-b">
+  <td class="py-2">
+    <select class="input" name="cloth_type[]" required
+            hx-get="{% url 'intake:price_lookup' %}" hx-trigger="change"
+            hx-target="closest tr" hx-include="closest tr" hx-swap="none"
+            hx-vals='js:{idx:"{{ idx }}"}'
+            onchange="updatePrice(this)">
+      <option value="">— вид —</option>
+      {% for c in cloth_types %}<option value="{{ c.id }}">{{ c.default_icon }} {{ c.name }}</option>{% endfor %}
+    </select>
+  </td>
+  <td>
+    <select class="input" name="service_type[]" required onchange="updatePrice(this)">
+      <option value="">— услуга —</option>
+      {% for s in service_types %}<option value="{{ s.id }}">{{ s.name }}</option>{% endfor %}
+    </select>
+  </td>
+  <td><input class="input" name="color[]" placeholder="чёрный"></td>
+  <td><input class="input" name="brand[]" placeholder=""></td>
+  <td><input class="input" name="g_notes[]" placeholder=""></td>
+  <td><input class="input text-right" type="number" step="0.01" min="0" name="price[]" value="0"></td>
+  <td><button type="button" class="text-red-600 hover:bg-red-50 p-1 rounded" onclick="removeRow(this)"><i data-lucide="x" class="w-4 h-4"></i></button></td>
+</tr>
+<script>
+if (typeof updatePrice !== 'function') {
+  window.updatePrice = function(el) {
+    const row = el.closest('tr');
+    const cloth = row.querySelector('select[name="cloth_type[]"]').value;
+    const service = row.querySelector('select[name="service_type[]"]').value;
+    if (cloth && service) {
+      fetch(`{% url 'intake:price_lookup' %}?cloth=${cloth}&service=${service}`)
+        .then(r => r.text()).then(html => {
+          const m = html.match(/data-price="([^"]+)"/);
+          if (m) {
+            row.querySelector('input[name="price[]"]').value = m[1];
+            if (typeof recalcTotal === 'function') recalcTotal();
+          }
+        });
+    }
+  };
+}
+if (window.lucide) lucide.createIcons();
+</script>

@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}Очередь — {{ BRAND_NAME }}{% endblock %}
+{% block content %}
+<h1 class="text-3xl font-bold mb-6">Живая очередь</h1>
+
+<div class="grid md:grid-cols-3 gap-4">
+  <section>
+    <h2 class="text-lg font-semibold mb-3">Ожидают ({{ waiting|length }})</h2>
+    <div class="space-y-2">
+      {% for e in waiting %}{% include 'partials/queue_entry.html' with entry=e %}{% empty %}
+        <p class="text-gray-400 text-sm">Никого нет</p>
+      {% endfor %}
+    </div>
+  </section>
+  <section>
+    <h2 class="text-lg font-semibold mb-3">Обслуживаются ({{ serving|length }})</h2>
+    <div class="space-y-2">
+      {% for e in serving %}{% include 'partials/queue_entry.html' with entry=e %}{% empty %}
+        <p class="text-gray-400 text-sm">Никого нет</p>
+      {% endfor %}
+    </div>
+  </section>
+  <section>
+    <h2 class="text-lg font-semibold mb-3">Готово</h2>
+    <div class="space-y-2">
+      {% for e in done %}{% include 'partials/queue_entry.html' with entry=e %}{% empty %}
+        <p class="text-gray-400 text-sm">Пока пусто</p>
+      {% endfor %}
+    </div>
+  </section>
+</div>
+{% endblock %}

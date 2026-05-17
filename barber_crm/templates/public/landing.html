@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% block title %}Главная — {{ BRAND_NAME }}{% endblock %}
+{% block content %}
+<section class="relative rounded-3xl overflow-hidden brand-gradient text-white p-10 md:p-16">
+  <div class="max-w-2xl">
+    <h1 class="text-3xl md:text-5xl font-bold leading-tight mb-4">Запишитесь к лучшим мастерам города</h1>
+    <p class="text-white/90 text-lg mb-6">Современный барбершоп с опытной командой. Стрижки, бритьё, уход — всё в одном месте.</p>
+    <div class="flex flex-wrap gap-3">
+      <a href="{% url 'bookings:calendar' %}" class="px-6 py-3 bg-white text-indigo-600 font-semibold rounded-xl shadow hover:shadow-lg">Записаться</a>
+      <a href="{% url 'services:list' %}" class="px-6 py-3 bg-white/10 backdrop-blur text-white font-semibold rounded-xl border border-white/30">Все услуги</a>
+    </div>
+  </div>
+</section>
+
+<section class="mt-12">
+  <div class="flex items-center justify-between mb-4">
+    <h2 class="text-2xl font-bold">Популярные услуги</h2>
+    <a href="{% url 'services:list' %}" class="text-indigo-600 text-sm font-medium">Все услуги →</a>
+  </div>
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    {% for s in featured_services %}
+      <div class="bg-white rounded-2xl p-5 border border-gray-100 hover:shadow-md transition">
+        <div class="text-2xl mb-2">{{ s.category.icon_emoji }}</div>
+        <div class="text-xs text-gray-500 mb-1">{{ s.category.name }}</div>
+        <h3 class="font-semibold text-lg mb-1">{{ s.name }}</h3>
+        <p class="text-sm text-gray-600 mb-3">{{ s.description|default:'Профессиональная услуга от опытных мастеров.'|truncatechars:90 }}</p>
+        <div class="flex items-center justify-between">
+          <div>
+            <div class="text-xs text-gray-500">Длительность</div>
+            <div class="font-medium">{{ s.duration_minutes }} мин</div>
+          </div>
+          <div class="text-right">
+            <div class="text-xs text-gray-500">Цена</div>
+            <div class="font-semibold text-indigo-600">{{ s.price|floatformat:0 }} ₽</div>
+          </div>
+        </div>
+        <a href="{% url 'bookings:calendar' %}?service={{ s.id }}" class="mt-4 block text-center brand-gradient text-white rounded-lg py-2 text-sm font-medium">Записаться</a>
+      </div>
+    {% empty %}
+      <p class="text-gray-500">Услуги скоро появятся.</p>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="mt-12">
+  <h2 class="text-2xl font-bold mb-4">Наша команда</h2>
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+    {% for b in barbers %}
+      <div class="bg-white rounded-2xl p-5 border border-gray-100 text-center">
+        <div class="w-20 h-20 mx-auto mb-3 rounded-full brand-gradient text-white flex items-center justify-center text-2xl font-bold">{{ b.user.initials }}</div>
+        <div class="font-semibold">{{ b.full_name }}</div>
+        <div class="text-xs text-gray-500 mb-1">{{ b.specialization|default:'Универсал' }}</div>
+        <div class="text-sm text-amber-500">★ {{ b.rating }}</div>
+        <div class="text-xs text-gray-400">Опыт: {{ b.experience_years }} лет</div>
+      </div>
+    {% empty %}
+      <p class="text-gray-500">Мастера скоро появятся.</p>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

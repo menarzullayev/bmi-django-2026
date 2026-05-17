@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% block title %}{{ customer.name }}{% endblock %}
+
+{% block content %}
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+  <div class="bg-white rounded-lg border border-gray-200 p-5">
+    <h2 class="font-bold text-lg">{{ customer.name }}</h2>
+    <dl class="mt-4 space-y-2 text-sm">
+      <div class="flex justify-between"><dt class="text-gray-500">Телефон</dt><dd>{{ customer.phone }}</dd></div>
+      <div class="flex justify-between"><dt class="text-gray-500">Email</dt><dd>{{ customer.email|default:'—' }}</dd></div>
+      <div class="flex justify-between"><dt class="text-gray-500">Компания</dt><dd>{{ customer.company|default:'—' }}</dd></div>
+      <div class="flex justify-between"><dt class="text-gray-500">Адрес</dt><dd class="text-right">{{ customer.address|default:'—' }}</dd></div>
+      <div class="flex justify-between border-t pt-2"><dt class="text-gray-500">Создан</dt><dd>{{ customer.created_at|date:"d.m.Y" }}</dd></div>
+    </dl>
+    {% if customer.notes %}
+    <div class="mt-4 pt-3 border-t border-gray-200">
+      <div class="text-xs text-gray-500 mb-1">Примечания</div>
+      <p class="text-sm text-gray-700 whitespace-pre-wrap">{{ customer.notes }}</p>
+    </div>
+    {% endif %}
+  </div>
+
+  <div class="lg:col-span-2 space-y-4">
+    <div class="bg-white rounded-lg border border-gray-200">
+      <div class="px-5 py-3 border-b border-gray-200"><h3 class="font-semibold">Автомобили</h3></div>
+      <table class="w-full text-sm">
+        <thead class="bg-gray-50 text-xs uppercase text-gray-500">
+          <tr>
+            <th class="px-4 py-2 text-left">Гос. номер</th>
+            <th class="px-4 py-2 text-left">Авто</th>
+            <th class="px-4 py-2 text-left">Год</th>
+            <th class="px-4 py-2 text-right">Пробег</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          {% for v in vehicles %}
+          <tr>
+            <td class="px-4 py-2 font-medium">{{ v.plate }}</td>
+            <td class="px-4 py-2">{{ v.make }} {{ v.model }}</td>
+            <td class="px-4 py-2">{{ v.year }}</td>
+            <td class="px-4 py-2 text-right">{{ v.mileage_km }} км</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="4" class="px-4 py-6 text-center text-gray-500">Нет автомобилей</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="bg-white rounded-lg border border-gray-200">
+      <div class="px-5 py-3 border-b border-gray-200"><h3 class="font-semibold">История заказов</h3></div>
+      <table class="w-full text-sm">
+        <thead class="bg-gray-50 text-xs uppercase text-gray-500">
+          <tr>
+            <th class="px-4 py-2 text-left">Номер</th>
+            <th class="px-4 py-2 text-left">Авто</th>
+            <th class="px-4 py-2 text-left">Статус</th>
+            <th class="px-4 py-2 text-left">Дата</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          {% for o in orders %}
+          <tr>
+            <td class="px-4 py-2"><a href="{% url 'workorders:detail' o.pk %}" class="text-brand-600 hover:underline font-medium">{{ o.order_number }}</a></td>
+            <td class="px-4 py-2 text-gray-700">{{ o.vehicle.make }} {{ o.vehicle.model }} <span class="text-xs text-gray-500">{{ o.vehicle.plate }}</span></td>
+            <td class="px-4 py-2">{% include 'components/status_badge.html' with order=o %}</td>
+            <td class="px-4 py-2 text-gray-500 text-xs">{{ o.received_at|date:"d.m.Y" }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="4" class="px-4 py-6 text-center text-gray-500">Нет заказов</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

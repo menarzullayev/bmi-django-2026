@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+{% block title %}Дашборд{% endblock %}
+
+{% block content %}
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+  {% include 'components/kpi_card.html' with label='Активные заказы' value=kpi_active icon='clipboard-list' icon_bg='bg-brand-100 text-brand-600' hint='в работе сейчас' %}
+  {% include 'components/kpi_card.html' with label='Выручка сегодня' value=kpi_revenue_today|floatformat:0 icon='banknote' icon_bg='bg-green-100 text-green-700' hint='за неделю: '|add:kpi_revenue_week|stringformat:'s' %}
+  {% include 'components/kpi_card.html' with label='Готово сегодня' value=kpi_completed_today icon='check-circle' icon_bg='bg-blue-100 text-blue-700' hint='завершённых заказов' %}
+  {% include 'components/kpi_card.html' with label='Низкие остатки' value=kpi_low_stock icon='alert-triangle' icon_bg='bg-red-100 text-red-700' hint='позиций ниже точки заказа' %}
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-6">
+  <div class="lg:col-span-2 bg-white rounded-lg border border-gray-200 p-5">
+    <h3 class="font-semibold text-gray-900 mb-1">Заказы по статусам</h3>
+    <p class="text-xs text-gray-500 mb-4">Распределение всех заказ-нарядов по этапам</p>
+    <canvas id="statusChart" height="120"></canvas>
+  </div>
+  <div class="bg-white rounded-lg border border-gray-200 p-5">
+    <h3 class="font-semibold text-gray-900 mb-1">Выручка за 7 дней</h3>
+    <p class="text-xs text-gray-500 mb-4">Сумма выставленных счетов</p>
+    <canvas id="trendChart" height="120"></canvas>
+  </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-6">
+  <div class="lg:col-span-2 bg-white rounded-lg border border-gray-200">
+    <div class="px-5 py-4 border-b border-gray-200 flex items-center justify-between">
+      <h3 class="font-semibold text-gray-900">Последние заказ-наряды</h3>
+      <a href="{% url 'workorders:list' %}" class="text-sm text-brand-600 hover:text-brand-700">Все →</a>
+    </div>
+    <table class="w-full text-sm">
+      <thead class="bg-gray-50 text-xs uppercase text-gray-500">
+        <tr>
+          <th class="px-4 py-2 text-left">Номер</th>
+          <th class="px-4 py-2 text-left">Авто</th>
+          <th class="px-4 py-2 text-left">Клиент</th>
+          <th class="px-4 py-2 text-left">Статус</th>
+          <th class="px-4 py-2 text-left">Принят</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100">
+        {% for o in recent_orders %}
+        <tr class="hover:bg-gray-50">
+          <td class="px-4 py-2 font-medium"><a href="{% url 'workorders:detail' o.pk %}" class="text-brand-600 hover:underline">{{ o.order_number }}</a></td>
+          <td class="px-4 py-2 text-gray-700">{{ o.vehicle.make }} {{ o.vehicle.model }} <span class="text-xs text-gray-500">{{ o.vehicle.plate }}</span></td>
+          <td class="px-4 py-2 text-gray-700">{{ o.vehicle.customer.name }}</td>
+          <td class="px-4 py-2">{% include 'components/status_badge.html' with order=o %}</td>
+          <td class="px-4 py-2 text-gray-500 text-xs">{{ o.received_at|date:"d.m.Y H:i" }}</td>
+        </tr>
+        {% empty %}
+        <tr><td class="px-4 py-6 text-center text-gray-500" colspan="5">Нет заказов</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="space-y-4">
+    <div class="bg-white rounded-lg border border-gray-200">
+      <div class="px-5 py-4 border-b border-gray-200">
+        <h3 class="font-semibold text-gray-900">Загрузка механиков</h3>
+      </div>
+      <ul class="divide-y divide-gray-100">
+        {% for m in mechanics %}
+        <li class="px-5 py-3 flex items-center justify-between text-sm">
+          <span class="text-gray-800">{{ m.get_full_name|default:m.username }}</span>
+          <span class="px-2 py-0.5 rounded text-xs font-medium bg-brand-100 text-brand-700">{{ m.active_load }}</span>
+        </li>
+        {% empty %}
+        <li class="px-5 py-3 text-sm text-gray-500">Нет механиков</li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <div class="bg-white rounded-lg border border-gray-200">
+      <div class="px-5 py-4 border-b border-gray-200 flex items-center justify-between">
+        <h3 class="font-semibold text-gray-900">Низкие остатки</h3>
+        <a href="{% url 'parts:list' %}?low=1" class="text-xs text-brand-600 hover:underline">Все →</a>
+      </div>
+      <ul class="divide-y divide-gray-100">
+        {% for p in low_stock_parts %}
+        <li class="px-5 py-3 flex items-center justify-between text-sm">
+          <span class="text-gray-800 truncate">{{ p.name }}</span>
+          <span class="px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-700">{{ p.quantity_in_stock }} шт</span>
+        </li>
+        {% empty %}
+        <li class="px-5 py-3 text-sm text-gray-500">Все запасы в норме</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  const statusCtx = document.getElementById('statusChart');
+  if (statusCtx) new Chart(statusCtx, {
+    type: 'bar',
+    data: {
+      labels: {{ status_chart.labels|safe }},
+      datasets: [{
+        label: 'Кол-во заказов',
+        data: {{ status_chart.data|safe }},
+        backgroundColor: '#f97316',
+        borderRadius: 4,
+      }],
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: { y: { beginAtZero: true, ticks: { precision: 0 } } },
+    },
+  });
+
+  const trendCtx = document.getElementById('trendChart');
+  if (trendCtx) new Chart(trendCtx, {
+    type: 'line',
+    data: {
+      labels: {{ trend_labels|safe }},
+      datasets: [{
+        label: 'Выручка',
+        data: {{ trend_data|safe }},
+        borderColor: '#f97316',
+        backgroundColor: 'rgba(249,115,22,0.15)',
+        fill: true, tension: 0.3, pointRadius: 3,
+      }],
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: { y: { beginAtZero: true } },
+    },
+  });
+</script>
+{% endblock %}

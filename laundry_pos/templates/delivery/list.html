@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block title %}Доставка{% endblock %}
+{% block content %}
+<div class="flex items-center justify-between mb-4">
+  <h1 class="text-2xl font-extrabold flex items-center gap-2"><i data-lucide="truck" class="w-7 h-7 text-cyan-700"></i> Доставка</h1>
+  <a href="{% url 'delivery:route_new' %}" class="btn btn-primary"><i data-lucide="plus" class="w-4 h-4"></i> Новый маршрут</a>
+</div>
+
+<h2 class="font-bold text-lg mb-2">Сегодня ({{ today|date:"d.m.Y" }})</h2>
+{% if today_routes %}
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-6">
+  {% for r in today_routes %}
+  <a href="{% url 'delivery:route_detail' r.pk %}" class="card hover:shadow-md transition">
+    <div class="flex justify-between items-start mb-2">
+      <div class="font-bold">Маршрут #{{ r.pk }}</div>
+      <span class="chip bg-cyan-100 text-cyan-800">{{ r.get_status_display }}</span>
+    </div>
+    <div class="text-sm">Водитель: {{ r.driver.display_name }}</div>
+    <div class="text-xs text-slate-500">Заданий: {{ r.assignments.count }}</div>
+  </a>
+  {% endfor %}
+</div>
+{% else %}
+<div class="card text-center text-slate-400 mb-6">Маршрутов на сегодня нет</div>
+{% endif %}
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+  <div>
+    <h2 class="font-bold text-lg mb-2">Предстоящие</h2>
+    <div class="card">
+      {% for r in upcoming %}
+      <a href="{% url 'delivery:route_detail' r.pk %}" class="flex justify-between items-center py-2 border-b last:border-0 hover:bg-slate-50">
+        <span>{{ r.date|date:"d.m.Y" }} — {{ r.driver.display_name }}</span>
+        <span class="chip bg-amber-100 text-amber-800">{{ r.get_status_display }}</span>
+      </a>
+      {% empty %}<div class="text-slate-400 text-sm">Нет</div>{% endfor %}
+    </div>
+  </div>
+  <div>
+    <h2 class="font-bold text-lg mb-2">Прошедшие</h2>
+    <div class="card">
+      {% for r in past %}
+      <a href="{% url 'delivery:route_detail' r.pk %}" class="flex justify-between items-center py-2 border-b last:border-0 hover:bg-slate-50">
+        <span>{{ r.date|date:"d.m.Y" }} — {{ r.driver.display_name }}</span>
+        <span class="chip bg-slate-100 text-slate-700">{{ r.get_status_display }}</span>
+      </a>
+      {% empty %}<div class="text-slate-400 text-sm">Нет</div>{% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

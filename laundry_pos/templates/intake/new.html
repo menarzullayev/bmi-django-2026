@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+{% block title %}Новый приём{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-extrabold mb-4 flex items-center gap-2">
+  <i data-lucide="plus-circle" class="w-7 h-7 text-cyan-700"></i> Новый приём
+</h1>
+
+<form method="post" class="space-y-5" id="intake-form">
+  {% csrf_token %}
+
+  <div class="card">
+    <h2 class="font-bold mb-3">Клиент</h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+      <div>
+        <label class="text-xs font-semibold uppercase text-slate-500">Телефон</label>
+        <input class="input" name="customer_phone" id="customer_phone" required
+               hx-get="{% url 'intake:customer_search' %}" hx-trigger="keyup changed delay:300ms"
+               hx-target="#customer-search-results" hx-include="this" hx-vals='{"q":""}'
+               onkeyup="this.setAttribute('hx-vals', JSON.stringify({q:this.value}))"
+               autocomplete="off" placeholder="+998 90 123-45-67">
+        <div id="customer-search-results" class="mt-1"></div>
+      </div>
+      <div>
+        <label class="text-xs font-semibold uppercase text-slate-500">ФИО</label>
+        <input class="input" name="customer_name" id="customer_name" required>
+      </div>
+      <div>
+        <label class="text-xs font-semibold uppercase text-slate-500">Адрес</label>
+        <input class="input" name="customer_address" id="customer_address">
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="flex items-center justify-between mb-3">
+      <h2 class="font-bold">Вещи</h2>
+      <button type="button" class="btn btn-ghost text-sm"
+              hx-get="{% url 'intake:garment_add' %}"
+              hx-vals='js:{idx: document.querySelectorAll("#garments-table tbody tr").length}'
+              hx-target="#garments-table tbody" hx-swap="beforeend">
+        <i data-lucide="plus" class="w-4 h-4"></i> Добавить вещь
+      </button>
+    </div>
+    <div class="overflow-x-auto">
+    <table class="w-full text-sm" id="garments-table">
+      <thead>
+        <tr class="text-left text-xs uppercase text-slate-500 border-b">
+          <th class="py-2">Вид</th><th>Услуга</th><th>Цвет</th><th>Бренд</th><th>Примечание</th><th class="text-right">Цена</th><th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% include 'partials/garment_row.html' with idx=0 %}
+      </tbody>
+    </table>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div class="card">
+      <h2 class="font-bold mb-3">Параметры</h2>
+      <div class="space-y-3">
+        <div>
+          <label class="text-xs font-semibold uppercase text-slate-500">Способ получения</label>
+          <select class="input" name="pickup_method" id="pickup_method" onchange="document.getElementById('delivery_block').style.display=this.value==='delivery'?'block':'none'">
+            <option value="in_store">Самовывоз</option>
+            <option value="delivery">Доставка</option>
+          </select>
+        </div>
+        <div id="delivery_block" style="display:none">
+          <label class="text-xs font-semibold uppercase text-slate-500">Адрес доставки</label>
+          <input class="input" name="delivery_address">
+        </div>
+        <div>
+          <label class="text-xs font-semibold uppercase text-slate-500">Готово к (план)</label>
+          <input class="input" type="datetime-local" name="ready_by">
+        </div>
+        <div>
+          <label class="text-xs font-semibold uppercase text-slate-500">Заметки</label>
+          <textarea class="input" name="notes" rows="2"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 class="font-bold mb-3">Итого</h2>
+      <div class="space-y-2">
+        <div class="flex justify-between"><span>Подытог:</span><b id="subtotal">0</b></div>
+        <div class="flex justify-between items-center">
+          <span>Скидка:</span>
+          <input class="input w-32 text-right" type="number" step="0.01" min="0" name="discount" id="discount" value="0" onchange="recalcTotal()">
+        </div>
+        <div class="flex justify-between text-xl border-t pt-2 mt-2">
+          <span class="font-bold">ИТОГО:</span>
+          <b id="total" class="text-cyan-700">0</b>
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary w-full justify-center mt-4">
+        <i data-lucide="check-circle" class="w-5 h-5"></i> Принять и распечатать
+      </button>
+    </div>
+  </div>
+</form>
+
+<script>
+function recalcTotal() {
+  let sub = 0;
+  document.querySelectorAll('#garments-table tbody input[name="price[]"]').forEach(i => {
+    sub += parseFloat(String(i.value).replace(',', '.')) || 0;
+  });
+  document.getElementById('subtotal').textContent = sub.toFixed(0);
+  const disc = parseFloat(String(document.getElementById('discount').value).replace(',', '.')) || 0;
+  const total = Math.max(sub - disc, 0);
+  document.getElementById('total').textContent = total.toFixed(0);
+}
+function removeRow(btn) { btn.closest('tr').remove(); recalcTotal(); }
+function pickCustomer(phone, name, address) {
+  document.getElementById('customer_phone').value = phone;
+  document.getElementById('customer_name').value = name;
+  document.getElementById('customer_address').value = address || '';
+  document.getElementById('customer-search-results').innerHTML = '';
+}
+document.addEventListener('htmx:afterSwap', recalcTotal);
+document.addEventListener('input', e => { if (e.target.name === 'price[]') recalcTotal(); });
+</script>
+{% endblock %}

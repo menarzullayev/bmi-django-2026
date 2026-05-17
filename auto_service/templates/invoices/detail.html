@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+{% block title %}{{ invoice.invoice_number }}{% endblock %}
+
+{% block topbar_actions %}
+<a href="{% url 'billing:pdf' invoice.pk %}" target="_blank" class="px-4 py-2 rounded-md bg-brand-500 hover:bg-brand-600 text-white text-sm font-medium flex items-center gap-2">
+  <i data-lucide="download" class="w-4 h-4"></i> PDF
+</a>
+{% endblock %}
+
+{% block extra_head %}
+<style>
+@media print {
+  aside, header, footer, .no-print { display: none !important; }
+  main { padding: 0 !important; }
+  body { background: white !important; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto bg-white border border-gray-200 rounded-lg p-8">
+  <div class="flex items-start justify-between border-b pb-4">
+    <div>
+      <h1 class="text-2xl font-bold">АвтоСервис ERP</h1>
+      <p class="text-sm text-gray-500">Счёт на оплату услуг автосервиса</p>
+    </div>
+    <div class="text-right">
+      <div class="text-xs text-gray-500">Счёт №</div>
+      <div class="text-lg font-bold">{{ invoice.invoice_number }}</div>
+      <div class="text-xs text-gray-500 mt-2">от {{ invoice.issued_at|date:"d.m.Y" }}</div>
+      <span class="inline-flex mt-1 px-2 py-0.5 rounded text-xs font-medium {{ invoice.status_badge_class }}">{{ invoice.status_label }}</span>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-2 gap-6 mt-4 text-sm">
+    <div>
+      <h3 class="font-semibold mb-1">Клиент</h3>
+      <p>{{ order.vehicle.customer.name }}</p>
+      <p class="text-gray-600 text-xs">Тел: {{ order.vehicle.customer.phone }}</p>
+      <p class="text-gray-600 text-xs">{{ order.vehicle.customer.address|default:'' }}</p>
+    </div>
+    <div>
+      <h3 class="font-semibold mb-1">Автомобиль</h3>
+      <p>{{ order.vehicle.make }} {{ order.vehicle.model }} {{ order.vehicle.year }}</p>
+      <p class="text-gray-600 text-xs">Гос. номер: {{ order.vehicle.plate }}</p>
+      <p class="text-gray-600 text-xs">VIN: {{ order.vehicle.vin|default:'—' }}</p>
+    </div>
+  </div>
+
+  <h3 class="font-semibold mt-6 mb-2">Выполненные работы</h3>
+  <table class="w-full text-sm border-collapse">
+    <thead><tr class="bg-gray-100 text-xs text-gray-600"><th class="px-3 py-2 text-left border">#</th><th class="px-3 py-2 text-left border">Описание</th><th class="px-3 py-2 text-right border">Часы</th><th class="px-3 py-2 text-right border">Ставка</th><th class="px-3 py-2 text-right border">Сумма</th></tr></thead>
+    <tbody>
+      {% for t in tasks %}
+      <tr><td class="px-3 py-2 border">{{ forloop.counter }}</td><td class="px-3 py-2 border">{{ t.description }}</td><td class="px-3 py-2 text-right border">{{ t.actual_hours|default:t.estimated_hours }}</td><td class="px-3 py-2 text-right border">{{ t.hourly_rate }}</td><td class="px-3 py-2 text-right border font-medium">{{ t.line_total|floatformat:2 }}</td></tr>
+      {% empty %}
+      <tr><td colspan="5" class="px-3 py-3 text-center text-gray-500 border">— нет работ —</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <h3 class="font-semibold mt-6 mb-2">Использованные запчасти</h3>
+  <table class="w-full text-sm border-collapse">
+    <thead><tr class="bg-gray-100 text-xs text-gray-600"><th class="px-3 py-2 text-left border">#</th><th class="px-3 py-2 text-left border">Наименование</th><th class="px-3 py-2 text-left border">Артикул</th><th class="px-3 py-2 text-right border">Кол-во</th><th class="px-3 py-2 text-right border">Цена</th><th class="px-3 py-2 text-right border">Сумма</th></tr></thead>
+    <tbody>
+      {% for u in part_usages %}
+      <tr><td class="px-3 py-2 border">{{ forloop.counter }}</td><td class="px-3 py-2 border">{{ u.part.name }}</td><td class="px-3 py-2 text-xs border">{{ u.part.sku }}</td><td class="px-3 py-2 text-right border">{{ u.quantity }}</td><td class="px-3 py-2 text-right border">{{ u.unit_price|floatformat:2 }}</td><td class="px-3 py-2 text-right border font-medium">{{ u.line_total|floatformat:2 }}</td></tr>
+      {% empty %}
+      <tr><td colspan="6" class="px-3 py-3 text-center text-gray-500 border">— запчасти не использовались —</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <div class="mt-6 flex justify-end">
+    <table class="text-sm">
+      <tr><td class="px-3 py-1 text-gray-600">Работы:</td><td class="px-3 py-1 text-right font-medium">{{ order.labor_total|floatformat:2 }} сум</td></tr>
+      <tr><td class="px-3 py-1 text-gray-600">Запчасти:</td><td class="px-3 py-1 text-right font-medium">{{ order.parts_total|floatformat:2 }} сум</td></tr>
+      <tr><td class="px-3 py-1 text-gray-600">Сумма без НДС:</td><td class="px-3 py-1 text-right">{{ invoice.subtotal|floatformat:2 }} сум</td></tr>
+      <tr><td class="px-3 py-1 text-gray-600">НДС:</td><td class="px-3 py-1 text-right">{{ invoice.tax_amount|floatformat:2 }} сум</td></tr>
+      <tr class="border-t-2 border-gray-900"><td class="px-3 py-2 font-bold">ИТОГО:</td><td class="px-3 py-2 text-right text-lg font-bold">{{ invoice.total|floatformat:2 }} сум</td></tr>
+    </table>
+  </div>
+
+  <div class="mt-10 grid grid-cols-2 gap-8 text-sm">
+    <div class="border-t pt-2">Подпись приёмщика</div>
+    <div class="border-t pt-2">Подпись клиента</div>
+  </div>
+</div>
+{% endblock %}

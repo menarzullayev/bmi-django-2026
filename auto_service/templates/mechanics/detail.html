@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% block title %}{{ mechanic.get_full_name|default:mechanic.username }}{% endblock %}
+
+{% block content %}
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+  <div class="bg-white rounded-lg border border-gray-200 p-5">
+    <div class="flex items-center gap-4">
+      <div class="w-14 h-14 rounded-full bg-brand-500 flex items-center justify-center text-white text-xl font-semibold">
+        {{ mechanic.first_name|first|default:mechanic.username|first|upper }}
+      </div>
+      <div>
+        <h2 class="font-bold text-lg">{{ mechanic.get_full_name|default:mechanic.username }}</h2>
+        <span class="px-2 py-0.5 rounded text-xs font-medium {{ mechanic.role_badge_class }}">{{ mechanic.get_role_display }}</span>
+      </div>
+    </div>
+    <dl class="mt-5 space-y-2 text-sm">
+      <div class="flex justify-between"><dt class="text-gray-500">Специализация</dt><dd>{{ mechanic.specialty|default:'—' }}</dd></div>
+      <div class="flex justify-between"><dt class="text-gray-500">Телефон</dt><dd>{{ mechanic.phone|default:'—' }}</dd></div>
+      <div class="flex justify-between"><dt class="text-gray-500">Email</dt><dd>{{ mechanic.email|default:'—' }}</dd></div>
+      <div class="flex justify-between"><dt class="text-gray-500">Ставка</dt><dd>{{ mechanic.hourly_rate|floatformat:2 }} сум/час</dd></div>
+      <div class="flex justify-between border-t pt-2"><dt class="text-gray-500">Активных заказов</dt><dd class="font-bold">{{ active_orders.count }}</dd></div>
+      <div class="flex justify-between"><dt class="text-gray-500">Часов за неделю</dt><dd class="font-bold">{{ hours_week }}</dd></div>
+    </dl>
+  </div>
+
+  <div class="lg:col-span-2 space-y-4">
+    <div class="bg-white rounded-lg border border-gray-200">
+      <div class="px-5 py-3 border-b border-gray-200"><h3 class="font-semibold">Активные заказы</h3></div>
+      <table class="w-full text-sm">
+        <thead class="bg-gray-50 text-xs uppercase text-gray-500">
+          <tr>
+            <th class="px-4 py-2 text-left">Номер</th>
+            <th class="px-4 py-2 text-left">Авто</th>
+            <th class="px-4 py-2 text-left">Клиент</th>
+            <th class="px-4 py-2 text-left">Статус</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          {% for o in active_orders %}
+          <tr>
+            <td class="px-4 py-2"><a href="{% url 'workorders:detail' o.pk %}" class="text-brand-600 hover:underline font-medium">{{ o.order_number }}</a></td>
+            <td class="px-4 py-2">{{ o.vehicle.make }} {{ o.vehicle.model }} <span class="text-xs text-gray-500">{{ o.vehicle.plate }}</span></td>
+            <td class="px-4 py-2">{{ o.vehicle.customer.name }}</td>
+            <td class="px-4 py-2">{% include 'components/status_badge.html' with order=o %}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="4" class="px-4 py-6 text-center text-gray-500">Нет активных заказов</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="bg-white rounded-lg border border-gray-200">
+      <div class="px-5 py-3 border-b border-gray-200"><h3 class="font-semibold">Последние завершённые</h3></div>
+      <table class="w-full text-sm">
+        <thead class="bg-gray-50 text-xs uppercase text-gray-500">
+          <tr>
+            <th class="px-4 py-2 text-left">Номер</th>
+            <th class="px-4 py-2 text-left">Авто</th>
+            <th class="px-4 py-2 text-left">Завершён</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          {% for o in completed_orders %}
+          <tr>
+            <td class="px-4 py-2"><a href="{% url 'workorders:detail' o.pk %}" class="text-brand-600 hover:underline font-medium">{{ o.order_number }}</a></td>
+            <td class="px-4 py-2">{{ o.vehicle.make }} {{ o.vehicle.model }}</td>
+            <td class="px-4 py-2 text-gray-500 text-xs">{{ o.completed_at|date:"d.m.Y H:i" }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="3" class="px-4 py-6 text-center text-gray-500">Нет данных</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

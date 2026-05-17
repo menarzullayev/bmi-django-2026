@@ -1,0 +1,44 @@
+# Python virtualenvs (absolute paths inside — rebuild from requirements.txt on server)
+venv/
+*/venv/
+.venv/
+
+# Python caches & build artifacts
+__pycache__/
+*/__pycache__/
+**/__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.pytest_cache/
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Logs & temp
+*.log
+*/staticfiles/
+
+# Cloudflare tunnel state (regenerated each run, contains ephemeral URLs)
+.tunnels/
+
+# Strategy / internal notes (not for public repo)
+task.md
+
+# Optional: uncomment if you don't want to ship the seeded DB
+# *.sqlite3
+# db.sqlite3
+# */db.sqlite3
+
+# Optional: uncomment to exclude generated media (QR codes, avatars)
+# */media/qr_codes/
+# */media/avatars/

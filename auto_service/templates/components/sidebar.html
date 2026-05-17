@@ -1,0 +1,76 @@
+{% load static %}
+<aside class="w-64 bg-gray-900 text-gray-100 flex-shrink-0 flex flex-col sticky top-0 h-screen">
+  <div class="px-6 py-5 border-b border-gray-800 flex items-center gap-3">
+    <div class="w-9 h-9 rounded-lg bg-brand-500 flex items-center justify-center text-white font-bold">
+      <i data-lucide="wrench" class="w-5 h-5"></i>
+    </div>
+    <div>
+      <div class="font-bold text-base leading-tight">АвтоService</div>
+      <div class="text-[11px] text-gray-400 leading-tight">ERP-система</div>
+    </div>
+  </div>
+
+  <nav class="flex-1 overflow-y-auto py-4 px-3 space-y-1 text-sm scrollbar-thin">
+    {% with nav=active_nav %}
+    <a href="{% url 'core:dashboard' %}" class="flex items-center gap-3 px-3 py-2 rounded-md transition
+       {% if nav == 'dashboard' %}bg-brand-500 text-white{% else %}text-gray-300 hover:bg-gray-800{% endif %}">
+      <i data-lucide="layout-dashboard" class="w-4 h-4"></i> Дашборд
+    </a>
+    <a href="{% url 'workorders:list' %}" class="flex items-center gap-3 px-3 py-2 rounded-md transition
+       {% if nav == 'orders' %}bg-brand-500 text-white{% else %}text-gray-300 hover:bg-gray-800{% endif %}">
+      <i data-lucide="clipboard-list" class="w-4 h-4"></i> Заказ-наряды
+    </a>
+    <a href="{% url 'kanban:board' %}" class="flex items-center gap-3 px-3 py-2 rounded-md transition
+       {% if nav == 'kanban' %}bg-brand-500 text-white{% else %}text-gray-300 hover:bg-gray-800{% endif %}">
+      <i data-lucide="kanban-square" class="w-4 h-4"></i> Канбан
+    </a>
+    <a href="{% url 'parts:list' %}" class="flex items-center gap-3 px-3 py-2 rounded-md transition
+       {% if nav == 'parts' %}bg-brand-500 text-white{% else %}text-gray-300 hover:bg-gray-800{% endif %}">
+      <i data-lucide="package" class="w-4 h-4"></i> Запчасти
+    </a>
+    <a href="{% url 'mechanics:list' %}" class="flex items-center gap-3 px-3 py-2 rounded-md transition
+       {% if nav == 'mechanics' %}bg-brand-500 text-white{% else %}text-gray-300 hover:bg-gray-800{% endif %}">
+      <i data-lucide="hard-hat" class="w-4 h-4"></i> Механики
+    </a>
+    <a href="{% url 'customers:list' %}" class="flex items-center gap-3 px-3 py-2 rounded-md transition
+       {% if nav == 'customers' %}bg-brand-500 text-white{% else %}text-gray-300 hover:bg-gray-800{% endif %}">
+      <i data-lucide="users" class="w-4 h-4"></i> Клиенты
+    </a>
+    <a href="{% url 'vehicles:list' %}" class="flex items-center gap-3 px-3 py-2 rounded-md transition
+       {% if nav == 'vehicles' %}bg-brand-500 text-white{% else %}text-gray-300 hover:bg-gray-800{% endif %}">
+      <i data-lucide="car" class="w-4 h-4"></i> Машины
+    </a>
+    <a href="{% url 'billing:list' %}" class="flex items-center gap-3 px-3 py-2 rounded-md transition
+       {% if nav == 'invoices' %}bg-brand-500 text-white{% else %}text-gray-300 hover:bg-gray-800{% endif %}">
+      <i data-lucide="receipt" class="w-4 h-4"></i> Счета
+    </a>
+    <a href="{% url 'reports:daily' %}" class="flex items-center gap-3 px-3 py-2 rounded-md transition
+       {% if nav == 'reports' %}bg-brand-500 text-white{% else %}text-gray-300 hover:bg-gray-800{% endif %}">
+      <i data-lucide="bar-chart-3" class="w-4 h-4"></i> Отчёты
+    </a>
+
+    <div class="pt-4 mt-4 border-t border-gray-800">
+      <a href="/admin/" target="_blank" class="flex items-center gap-3 px-3 py-2 rounded-md text-gray-400 hover:bg-gray-800 text-sm">
+        <i data-lucide="shield" class="w-4 h-4"></i> Админ-панель
+      </a>
+    </div>
+    {% endwith %}
+  </nav>
+
+  <div class="px-4 py-3 border-t border-gray-800 text-xs">
+    <div class="flex items-center gap-3 mb-2">
+      <div class="w-8 h-8 rounded-full bg-brand-500 flex items-center justify-center text-white text-sm font-semibold">
+        {{ user.first_name|first|default:user.username|first|upper }}
+      </div>
+      <div class="min-w-0">
+        <div class="font-medium text-gray-100 truncate">{{ user.get_full_name|default:user.username }}</div>
+        <div class="text-gray-400 truncate">{{ user.get_role_display }}</div>
+      </div>
+    </div>
+    <form method="post" action="{% url 'logout' %}">{% csrf_token %}
+      <button class="w-full px-3 py-2 rounded-md bg-gray-800 hover:bg-gray-700 text-gray-200 flex items-center justify-center gap-2">
+        <i data-lucide="log-out" class="w-4 h-4"></i> Выйти
+      </button>
+    </form>
+  </div>
+</aside>

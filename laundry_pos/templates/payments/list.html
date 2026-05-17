@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% block title %}Оплаты{% endblock %}
+{% block content %}
+<div class="flex items-center justify-between mb-4">
+  <h1 class="text-2xl font-extrabold flex items-center gap-2"><i data-lucide="wallet" class="w-7 h-7 text-cyan-700"></i> История оплат</h1>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+  <div class="card"><div class="text-xs uppercase text-slate-500">Всего по фильтру</div><div class="text-2xl font-extrabold text-cyan-700 mt-1">{{ total|floatformat:0 }}</div></div>
+  <div class="card"><div class="text-xs uppercase text-slate-500">Сегодня</div><div class="text-2xl font-extrabold text-emerald-600 mt-1">{{ today_total|floatformat:0 }}</div></div>
+  <div class="card"><div class="text-xs uppercase text-slate-500">Записей</div><div class="text-2xl font-extrabold text-slate-700 mt-1">{{ payments|length }}</div></div>
+</div>
+
+<form class="card mb-4" method="get">
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-3 items-end">
+    <div>
+      <label class="text-xs font-semibold uppercase text-slate-500">Метод</label>
+      <select class="input" name="method">
+        <option value="">— все —</option>
+        {% for code, label in method_choices %}<option value="{{ code }}" {% if filters.method == code %}selected{% endif %}>{{ label }}</option>{% endfor %}
+      </select>
+    </div>
+    <div><label class="text-xs font-semibold uppercase text-slate-500">С даты</label><input class="input" type="date" name="date_from" value="{{ filters.date_from }}"></div>
+    <div><label class="text-xs font-semibold uppercase text-slate-500">По дату</label><input class="input" type="date" name="date_to" value="{{ filters.date_to }}"></div>
+    <div><button class="btn btn-primary w-full justify-center"><i data-lucide="filter" class="w-4 h-4"></i> Применить</button></div>
+  </div>
+</form>
+
+<div class="card">
+  <table class="w-full text-sm">
+    <thead><tr class="text-left text-xs uppercase text-slate-500 border-b">
+      <th class="py-2">Когда</th><th>Квитанция</th><th>Клиент</th><th>Метод</th><th>Кассир</th><th class="text-right">Сумма</th>
+    </tr></thead>
+    <tbody>
+      {% for p in payments %}
+      <tr class="border-b last:border-0 hover:bg-slate-50">
+        <td class="py-2 text-xs">{{ p.paid_at|date:"d.m.Y H:i" }}</td>
+        <td><a class="text-cyan-700 font-mono text-xs hover:underline" href="{% url 'tickets:detail' p.ticket.pk %}">{{ p.ticket.ticket_number }}</a></td>
+        <td>{{ p.ticket.customer.full_name }}</td>
+        <td><span class="chip bg-cyan-100 text-cyan-800">{{ p.get_method_display }}</span></td>
+        <td class="text-xs">{{ p.cashier.display_name }}</td>
+        <td class="text-right font-semibold">{{ p.amount|floatformat:0 }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="6" class="py-6 text-center text-slate-400">Нет оплат</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

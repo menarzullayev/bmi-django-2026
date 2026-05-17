@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block title %}Вход — {{ BRAND_NAME }}{% endblock %}
+{% block content %}
+<div class="max-w-md mx-auto bg-white rounded-2xl p-8 border border-gray-100">
+  <h1 class="text-2xl font-bold mb-6 text-center">Вход в систему</h1>
+
+  {% if error %}<div class="mb-4 px-4 py-2 rounded-lg bg-rose-50 text-rose-700 text-sm">{{ error }}</div>{% endif %}
+  {% if info %}<div class="mb-4 px-4 py-2 rounded-lg bg-amber-50 text-amber-700 text-sm">{{ info }}</div>{% endif %}
+
+  <div class="flex border border-gray-200 rounded-lg p-1 mb-6 text-sm">
+    <button class="flex-1 py-2 rounded-md bg-gray-100" onclick="switchTab('pwd', this)">Пароль</button>
+    <button class="flex-1 py-2 rounded-md" onclick="switchTab('otp', this)">По телефону</button>
+  </div>
+
+  <form id="form-pwd" method="post" class="space-y-4">{% csrf_token %}
+    <input type="hidden" name="mode" value="password">
+    <div>
+      <label class="block text-sm font-medium mb-1">Логин</label>
+      <input name="username" required class="w-full border border-gray-200 rounded-lg px-3 py-2">
+    </div>
+    <div>
+      <label class="block text-sm font-medium mb-1">Пароль</label>
+      <input name="password" type="password" required class="w-full border border-gray-200 rounded-lg px-3 py-2">
+    </div>
+    <button type="submit" class="w-full brand-gradient text-white font-medium rounded-lg py-2.5">Войти</button>
+  </form>
+
+  <form id="form-otp" method="post" class="space-y-4 hidden">{% csrf_token %}
+    <input type="hidden" name="mode" value="otp">
+    <div>
+      <label class="block text-sm font-medium mb-1">Телефон</label>
+      <input name="phone" type="tel" value="{{ phone|default:'' }}" placeholder="+998901234567" required class="w-full border border-gray-200 rounded-lg px-3 py-2">
+    </div>
+    {% if otp_sent %}
+    <div>
+      <label class="block text-sm font-medium mb-1">Код из SMS</label>
+      <input name="code" placeholder="123456" required class="w-full border border-gray-200 rounded-lg px-3 py-2">
+    </div>
+    {% endif %}
+    <button type="submit" class="w-full brand-gradient text-white font-medium rounded-lg py-2.5">{% if otp_sent %}Подтвердить{% else %}Получить код{% endif %}</button>
+  </form>
+
+  <p class="text-center text-sm text-gray-500 mt-6">Нет аккаунта? <a href="{% url 'accounts:register' %}" class="text-indigo-600 font-medium">Регистрация</a></p>
+</div>
+<script>
+function switchTab(t, btn){
+  document.getElementById('form-pwd').classList.toggle('hidden', t!=='pwd');
+  document.getElementById('form-otp').classList.toggle('hidden', t!=='otp');
+  for (const b of btn.parentElement.children){ b.classList.remove('bg-gray-100'); }
+  btn.classList.add('bg-gray-100');
+}
+</script>
+{% endblock %}

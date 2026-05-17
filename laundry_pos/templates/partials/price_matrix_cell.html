@@ -1,0 +1,4 @@
+<div hx-get="{% url 'pricing:cell_edit' cloth_id service_id %}" hx-trigger="click"
+     hx-swap="outerHTML" class="cursor-pointer hover:bg-cyan-50 rounded px-2 py-1">
+  {% if price %}<span class="font-semibold">{{ price|floatformat:0 }}</span>{% else %}<span class="text-slate-300">—</span>{% endif %}
+</div>

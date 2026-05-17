@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block title %}Прайс-лист{% endblock %}
+{% block content %}
+<div class="flex items-center justify-between mb-4">
+  <h1 class="text-2xl font-extrabold flex items-center gap-2"><i data-lucide="tag" class="w-7 h-7 text-cyan-700"></i> Прайс-лист</h1>
+  <div class="flex gap-2">
+    <a href="{% url 'catalog:cloth_types' %}" class="btn btn-ghost"><i data-lucide="shirt" class="w-4 h-4"></i> Виды одежды</a>
+    <a href="{% url 'catalog:service_types' %}" class="btn btn-ghost"><i data-lucide="sparkles" class="w-4 h-4"></i> Услуги</a>
+  </div>
+</div>
+
+<div class="card overflow-x-auto">
+  <p class="text-xs text-slate-500 mb-3">Кликните по цене для редактирования. Цены указаны в сумах.</p>
+  <table class="w-full text-sm">
+    <thead>
+      <tr class="border-b">
+        <th class="text-left py-2 px-2 text-xs uppercase text-slate-500">Вид / Услуга</th>
+        {% for s in service_types %}
+        <th class="text-center px-2 text-xs uppercase text-slate-500">{{ s.name }}</th>
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in rows %}
+      <tr class="border-b last:border-0 hover:bg-slate-50">
+        <td class="py-2 px-2 font-semibold">{{ row.cloth.default_icon }} {{ row.cloth.name }}</td>
+        {% for cell in row.cells %}
+        <td class="text-center px-2">
+          <div hx-get="{% url 'pricing:cell_edit' cell.cloth.id cell.service.id %}" hx-trigger="click"
+               hx-swap="outerHTML" class="cursor-pointer hover:bg-cyan-50 rounded px-2 py-1">
+            {% if cell.price %}<span class="font-semibold">{{ cell.price|floatformat:0 }}</span>{% else %}<span class="text-slate-300">—</span>{% endif %}
+          </div>
+        </td>
+        {% endfor %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

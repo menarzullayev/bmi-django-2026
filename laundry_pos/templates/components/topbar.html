@@ -1,0 +1,41 @@
+{% load static %}
+<header class="bg-gradient-to-r from-cyan-600 to-sky-700 text-white shadow no-print">
+  <div class="max-w-7xl mx-auto px-4 py-3 flex items-center gap-6">
+    <a href="{% url 'pos:dashboard' %}" class="flex items-center gap-2 font-extrabold text-xl">
+      <i data-lucide="shirt" class="w-7 h-7"></i>
+      <span>Химчистка</span>
+    </a>
+    <nav class="flex items-center gap-1 flex-1 text-sm font-semibold">
+      <a href="{% url 'intake:new' %}" class="px-3 py-2 rounded-md hover:bg-white/15 flex items-center gap-1.5">
+        <i data-lucide="plus-circle" class="w-4 h-4"></i> Приём
+      </a>
+      <a href="{% url 'tickets:list' %}" class="px-3 py-2 rounded-md hover:bg-white/15 flex items-center gap-1.5">
+        <i data-lucide="receipt" class="w-4 h-4"></i> Квитанции
+      </a>
+      <a href="{% url 'delivery:list' %}" class="px-3 py-2 rounded-md hover:bg-white/15 flex items-center gap-1.5">
+        <i data-lucide="truck" class="w-4 h-4"></i> Доставка
+      </a>
+      <a href="{% url 'pricing:matrix' %}" class="px-3 py-2 rounded-md hover:bg-white/15 flex items-center gap-1.5">
+        <i data-lucide="tag" class="w-4 h-4"></i> Цены
+      </a>
+      <a href="{% url 'payments:list' %}" class="px-3 py-2 rounded-md hover:bg-white/15 flex items-center gap-1.5">
+        <i data-lucide="wallet" class="w-4 h-4"></i> Оплаты
+      </a>
+      <a href="{% url 'reports:daily' %}" class="px-3 py-2 rounded-md hover:bg-white/15 flex items-center gap-1.5">
+        <i data-lucide="bar-chart-3" class="w-4 h-4"></i> Отчёты
+      </a>
+    </nav>
+    <div class="flex items-center gap-4 text-sm">
+      <span id="clock" class="font-mono"></span>
+      <div class="text-right leading-tight">
+        <div class="font-bold">{{ user.display_name }}</div>
+        <div class="text-xs opacity-80">{{ user.get_role_display }}</div>
+      </div>
+      <form action="{% url 'logout' %}" method="post">{% csrf_token %}
+        <button type="submit" class="bg-white/15 hover:bg-white/25 px-3 py-1.5 rounded-md text-sm flex items-center gap-1.5">
+          <i data-lucide="log-out" class="w-4 h-4"></i> Выход
+        </button>
+      </form>
+    </div>
+  </div>
+</header>

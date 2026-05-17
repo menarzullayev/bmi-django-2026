@@ -1,0 +1,6 @@
+<tr>
+  <td class="px-4 py-2">{{ usage.part.name }} <span class="text-xs text-gray-500">{{ usage.part.sku }}</span></td>
+  <td class="px-4 py-2 text-right">{{ usage.quantity }}</td>
+  <td class="px-4 py-2 text-right">{{ usage.unit_price|floatformat:2 }}</td>
+  <td class="px-4 py-2 text-right font-medium">{{ usage.line_total|floatformat:2 }}</td>
+</tr>

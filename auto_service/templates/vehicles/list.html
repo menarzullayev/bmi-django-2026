@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block title %}Автомобили{% endblock %}
+
+{% block content %}
+<form method="get" class="bg-white rounded-lg border border-gray-200 p-4 mb-4 flex gap-3 text-sm">
+  <input type="text" name="q" value="{{ filter_q }}" placeholder="Гос. номер, марка, модель, VIN, клиент"
+    class="flex-1 rounded-md border border-gray-300 px-3 py-2">
+  <button class="px-4 py-2 rounded-md bg-gray-900 text-white">Найти</button>
+</form>
+
+<div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+  <div class="px-4 py-3 border-b border-gray-200 text-sm text-gray-600">Найдено: <b>{{ total }}</b></div>
+  <table class="w-full text-sm">
+    <thead class="bg-gray-50 text-xs uppercase text-gray-500">
+      <tr>
+        <th class="px-4 py-2 text-left">Гос. номер</th>
+        <th class="px-4 py-2 text-left">Марка/Модель</th>
+        <th class="px-4 py-2 text-left">Год</th>
+        <th class="px-4 py-2 text-left">Клиент</th>
+        <th class="px-4 py-2 text-right">Пробег</th>
+        <th class="px-4 py-2 text-right">Заказов</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-gray-100">
+      {% for v in vehicles %}
+      <tr class="hover:bg-gray-50">
+        <td class="px-4 py-2 font-medium">{{ v.plate }}</td>
+        <td class="px-4 py-2">{{ v.make }} {{ v.model }}</td>
+        <td class="px-4 py-2 text-gray-700">{{ v.year }}</td>
+        <td class="px-4 py-2"><a href="{% url 'customers:detail' v.customer.pk %}" class="text-brand-600 hover:underline">{{ v.customer.name }}</a></td>
+        <td class="px-4 py-2 text-right">{{ v.mileage_km }} км</td>
+        <td class="px-4 py-2 text-right">{{ v.orders_count }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="6" class="px-4 py-8 text-center text-gray-500">Автомобили не найдены</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

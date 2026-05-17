@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block title %}Клиенты — {{ BRAND_NAME }}{% endblock %}
+{% block content %}
+<div class="flex items-center justify-between mb-6 flex-wrap gap-2">
+  <h1 class="text-3xl font-bold">Клиенты</h1>
+  <form class="flex gap-2">
+    <input name="q" value="{{ q }}" placeholder="Поиск по имени, телефону..." class="border border-gray-200 rounded-lg px-3 py-2 text-sm w-72">
+    <button class="brand-gradient text-white text-sm px-4 rounded-lg">Найти</button>
+  </form>
+</div>
+<div class="bg-white rounded-2xl border border-gray-100 overflow-x-auto">
+  <table class="w-full text-sm">
+    <thead class="bg-gray-50 text-gray-600 text-left">
+      <tr>
+        <th class="px-4 py-2">Клиент</th><th>Телефон</th><th>Любимый мастер</th><th>Записей</th><th>День рождения</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for c in clients %}
+        <tr class="border-t border-gray-50">
+          <td class="px-4 py-2 font-medium">{{ c.full_name }}</td>
+          <td>{{ c.phone }}</td>
+          <td>{{ c.preferred_barber.full_name|default:'—' }}</td>
+          <td>{{ c.appointments.count }}</td>
+          <td>{{ c.birthday|default:'—' }}</td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="5" class="px-4 py-6 text-center text-gray-400">Ничего не найдено</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

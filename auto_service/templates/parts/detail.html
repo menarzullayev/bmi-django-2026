@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% block title %}{{ part.name }}{% endblock %}
+
+{% block content %}
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+  <div class="lg:col-span-2 space-y-4">
+    <div class="bg-white rounded-lg border border-gray-200 p-5">
+      <div class="flex items-start justify-between flex-wrap gap-3">
+        <div>
+          <div class="text-xs uppercase tracking-wider text-gray-500">Запчасть</div>
+          <h2 class="text-xl font-bold">{{ part.name }}</h2>
+          <div class="text-xs text-gray-500 mt-1">Артикул: {{ part.sku }}</div>
+        </div>
+        <span class="px-3 py-1 rounded text-sm font-medium
+          {% if part.is_low_stock %}bg-red-100 text-red-700{% else %}bg-green-100 text-green-700{% endif %}">
+          {{ part.quantity_in_stock }} шт на складе
+        </span>
+      </div>
+
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-5 text-sm">
+        <div><div class="text-xs text-gray-500">Категория</div><div class="font-medium">{{ part.category.name }}</div></div>
+        <div><div class="text-xs text-gray-500">Производитель</div><div class="font-medium">{{ part.brand|default:'—' }}</div></div>
+        <div><div class="text-xs text-gray-500">Закупка</div><div class="font-medium">{{ part.unit_cost|floatformat:2 }}</div></div>
+        <div><div class="text-xs text-gray-500">Продажа</div><div class="font-medium">{{ part.unit_price|floatformat:2 }}</div></div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-lg border border-gray-200">
+      <div class="px-5 py-4 border-b border-gray-200">
+        <h3 class="font-semibold">История использования</h3>
+      </div>
+      <table class="w-full text-sm">
+        <thead class="bg-gray-50 text-xs uppercase text-gray-500">
+          <tr>
+            <th class="px-4 py-2 text-left">Дата</th>
+            <th class="px-4 py-2 text-left">Заказ-наряд</th>
+            <th class="px-4 py-2 text-right">Кол-во</th>
+            <th class="px-4 py-2 text-right">Сумма</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          {% for u in usages %}
+          <tr>
+            <td class="px-4 py-2 text-gray-500 text-xs">{{ u.used_at|date:"d.m.Y H:i" }}</td>
+            <td class="px-4 py-2"><a href="{% url 'workorders:detail' u.workorder.pk %}" class="text-brand-600 hover:underline">{{ u.workorder.order_number }}</a></td>
+            <td class="px-4 py-2 text-right">{{ u.quantity }}</td>
+            <td class="px-4 py-2 text-right font-medium">{{ u.line_total|floatformat:2 }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="4" class="px-4 py-6 text-center text-gray-500">Нет использований</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="space-y-4">
+    <div class="bg-white rounded-lg border border-gray-200 p-5 text-sm">
+      <h3 class="font-semibold mb-3">Корректировка склада</h3>
+      <div class="flex items-center gap-2">
+        <form hx-post="{% url 'parts:adjust' part.pk %}" hx-target="#stock-qty" hx-select="#stock-qty" hx-swap="outerHTML">
+          {% csrf_token %}<input type="hidden" name="delta" value="-1">
+          <button class="px-3 py-2 rounded bg-red-100 text-red-700 font-bold">−1</button>
+        </form>
+        <div id="stock-qty" class="flex-1 text-center text-xl font-bold">{{ part.quantity_in_stock }}</div>
+        <form hx-post="{% url 'parts:adjust' part.pk %}" hx-target="#stock-qty" hx-select="#stock-qty" hx-swap="outerHTML">
+          {% csrf_token %}<input type="hidden" name="delta" value="1">
+          <button class="px-3 py-2 rounded bg-green-100 text-green-700 font-bold">+1</button>
+        </form>
+      </div>
+      <p class="text-xs text-gray-500 mt-3">Точка дозаказа: {{ part.reorder_level }}</p>
+    </div>
+    <a href="{% url 'parts:list' %}" class="block text-center px-3 py-2 rounded-md border border-gray-300 text-sm">← К списку</a>
+  </div>
+</div>
+{% endblock %}

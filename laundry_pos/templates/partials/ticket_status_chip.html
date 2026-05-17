@@ -1,0 +1,4 @@
+{% load static %}
+<div id="status-chip-{{ ticket.pk }}" class="inline-block">
+  <span class="chip {{ ticket.status_color }}">{{ ticket.get_status_display }}</span>
+</div>

@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% block title %}Новый маршрут{% endblock %}
+{% block content %}
+<div class="flex items-center justify-between mb-4">
+  <h1 class="text-2xl font-extrabold flex items-center gap-2"><i data-lucide="truck" class="w-7 h-7 text-cyan-700"></i> Новый маршрут</h1>
+  <a href="{% url 'delivery:list' %}" class="btn btn-ghost"><i data-lucide="arrow-left" class="w-4 h-4"></i> Назад</a>
+</div>
+
+<form method="post" class="space-y-4">{% csrf_token %}
+  <div class="card">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+      <div>
+        <label class="text-xs font-semibold uppercase text-slate-500">Дата</label>
+        <input class="input" type="date" name="date" value="{{ today|date:'Y-m-d' }}" required>
+      </div>
+      <div>
+        <label class="text-xs font-semibold uppercase text-slate-500">Водитель</label>
+        <select class="input" name="driver" required>
+          <option value="">— выберите —</option>
+          {% for d in drivers %}<option value="{{ d.id }}">{{ d.display_name }}</option>{% endfor %}
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2 class="font-bold mb-3">Квитанции к доставке</h2>
+    {% if ready_tickets %}
+    <table class="w-full text-sm">
+      <thead><tr class="text-left text-xs uppercase text-slate-500 border-b"><th class="py-2 w-8"></th><th>№</th><th>Клиент</th><th>Адрес</th></tr></thead>
+      <tbody>
+        {% for t in ready_tickets %}
+        <tr class="border-b last:border-0">
+          <td class="py-2"><input type="checkbox" name="ticket_ids" value="{{ t.id }}" checked></td>
+          <td class="font-mono text-xs">{{ t.ticket_number }}</td>
+          <td>{{ t.customer.full_name }}<div class="text-xs text-slate-500">{{ t.customer.phone }}</div></td>
+          <td class="text-xs">{{ t.delivery_address|default:t.customer.address }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="text-slate-400 text-center py-4">Нет готовых квитанций с типом «Доставка»</div>
+    {% endif %}
+  </div>
+
+  <button class="btn btn-primary"><i data-lucide="check" class="w-4 h-4"></i> Создать маршрут</button>
+</form>
+{% endblock %}

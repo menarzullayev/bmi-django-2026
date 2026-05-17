@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+{% block title %}POS — Главная{% endblock %}
+{% block content %}
+<div class="flex items-center justify-between mb-6">
+  <h1 class="text-2xl font-extrabold">Главная панель</h1>
+  <div class="text-sm text-slate-500">{{ today|date:"l, d E Y" }}</div>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+  <div class="card">
+    <div class="text-xs uppercase text-slate-500">Заказов сегодня</div>
+    <div class="text-3xl font-extrabold text-cyan-700 mt-1">{{ stats.count_today }}</div>
+  </div>
+  <div class="card">
+    <div class="text-xs uppercase text-slate-500">Выручка сегодня</div>
+    <div class="text-3xl font-extrabold text-emerald-600 mt-1">{{ stats.revenue_today|floatformat:0 }}</div>
+    <div class="text-xs text-slate-400">сум</div>
+  </div>
+  <div class="card">
+    <div class="text-xs uppercase text-slate-500">Готово к выдаче</div>
+    <div class="text-3xl font-extrabold text-green-600 mt-1">{{ stats.ready_count }}</div>
+  </div>
+  <div class="card">
+    <div class="text-xs uppercase text-slate-500">В работе</div>
+    <div class="text-3xl font-extrabold text-amber-600 mt-1">{{ stats.in_progress }}</div>
+  </div>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
+  <a href="{% url 'intake:new' %}" class="card hover:bg-cyan-50 transition flex items-center gap-3">
+    <i data-lucide="plus-circle" class="w-10 h-10 text-cyan-600"></i>
+    <div>
+      <div class="font-bold">Новый приём</div>
+      <div class="text-xs text-slate-500">Принять одежду от клиента</div>
+    </div>
+  </a>
+  <a href="{% url 'tickets:list' %}" class="card hover:bg-cyan-50 transition flex items-center gap-3">
+    <i data-lucide="search" class="w-10 h-10 text-cyan-600"></i>
+    <div>
+      <div class="font-bold">Поиск квитанции</div>
+      <div class="text-xs text-slate-500">Найти заказ по номеру или клиенту</div>
+    </div>
+  </a>
+  <a href="{% url 'delivery:list' %}" class="card hover:bg-cyan-50 transition flex items-center gap-3">
+    <i data-lucide="truck" class="w-10 h-10 text-cyan-600"></i>
+    <div>
+      <div class="font-bold">Доставка сегодня</div>
+      <div class="text-xs text-slate-500">Маршруты водителей</div>
+    </div>
+  </a>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+  <div class="card lg:col-span-2">
+    <h2 class="font-bold mb-3">Последние квитанции</h2>
+    <table class="w-full text-sm">
+      <thead>
+        <tr class="text-left text-xs uppercase text-slate-500 border-b">
+          <th class="py-2">№</th><th>Клиент</th><th>Статус</th><th class="text-right">Итого</th><th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for t in recent %}
+        <tr class="border-b last:border-0 hover:bg-slate-50">
+          <td class="py-2 font-mono text-xs">{{ t.ticket_number }}</td>
+          <td>{{ t.customer.full_name }}<div class="text-xs text-slate-400">{{ t.customer.phone }}</div></td>
+          <td><span class="chip {{ t.status_color }}">{{ t.get_status_display }}</span></td>
+          <td class="text-right font-semibold">{{ t.total|floatformat:0 }}</td>
+          <td class="text-right"><a class="text-cyan-700 hover:underline text-xs" href="{% url 'tickets:detail' t.pk %}">Открыть →</a></td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5" class="py-6 text-center text-slate-400">Пока нет квитанций</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2 class="font-bold mb-3">По статусам</h2>
+    <ul class="space-y-2 text-sm">
+      {% for s in status_rows %}
+      <li class="flex justify-between items-center">
+        <span>{{ s.label }}</span>
+        <span class="font-bold text-cyan-700">{{ s.count }}</span>
+      </li>
+      {% endfor %}
+    </ul>
+    {% if ready_tickets %}
+    <h3 class="font-bold mt-5 mb-2 text-sm">Готовы к выдаче</h3>
+    <ul class="text-xs space-y-1">
+      {% for t in ready_tickets %}
+      <li><a class="text-cyan-700 hover:underline" href="{% url 'tickets:detail' t.pk %}">{{ t.ticket_number }}</a> — {{ t.customer.full_name }}</li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

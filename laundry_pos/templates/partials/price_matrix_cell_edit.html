@@ -1,0 +1,7 @@
+{% load static %}
+<form hx-post="{% url 'pricing:cell_save' cloth_id service_id %}" hx-swap="outerHTML" class="flex gap-1 justify-center">
+  {% csrf_token %}
+  <input type="number" step="0.01" min="0" name="price" value="{{ price }}" autofocus
+         class="input w-24 text-right text-sm py-1">
+  <button class="bg-cyan-600 text-white px-2 rounded-md text-xs font-bold">OK</button>
+</form>

@@ -1,0 +1,7 @@
+<tr>
+  <td class="px-4 py-2">{{ task.description }}</td>
+  <td class="px-4 py-2 text-gray-700">{{ task.mechanic.get_full_name|default:'—' }}</td>
+  <td class="px-4 py-2"><span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium {{ task.status_badge_class }}">{{ task.get_status_display }}</span></td>
+  <td class="px-4 py-2 text-right">{{ task.estimated_hours }}</td>
+  <td class="px-4 py-2 text-right font-medium">{{ task.line_total|floatformat:2 }}</td>
+</tr>

@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}Готово — {{ BRAND_NAME }}{% endblock %}
+{% block content %}
+<div class="max-w-xl mx-auto text-center bg-white rounded-2xl p-10 border border-gray-100">
+  <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-3xl">✓</div>
+  <h1 class="text-2xl font-bold mb-2">Запись создана!</h1>
+  <p class="text-gray-600 mb-6">Мы ждём вас {{ appointment.start_at|date:'d.m.Y' }} в {{ appointment.start_at|date:'H:i' }}.</p>
+  <dl class="text-left space-y-2 text-sm bg-gray-50 rounded-xl p-4 mb-6">
+    <div class="flex justify-between"><dt class="text-gray-500">Услуга</dt><dd class="font-medium">{{ appointment.service.name }}</dd></div>
+    <div class="flex justify-between"><dt class="text-gray-500">Мастер</dt><dd class="font-medium">{{ appointment.barber.full_name }}</dd></div>
+    <div class="flex justify-between"><dt class="text-gray-500">Стоимость</dt><dd class="font-semibold text-indigo-600">{{ appointment.service.price|floatformat:0 }} ₽</dd></div>
+  </dl>
+  <a href="{% url 'clients:me' %}" class="block brand-gradient text-white font-medium rounded-lg py-3">Мои записи</a>
+</div>
+{% endblock %}

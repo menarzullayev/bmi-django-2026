@@ -1,0 +1,1 @@
+{% with cls=order.status_badge_class %}<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium {{ cls }}">{{ order.get_status_display }}</span>{% endwith %}

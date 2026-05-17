@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block title %}Подтверждение записи — {{ BRAND_NAME }}{% endblock %}
+{% block content %}
+<div class="max-w-xl mx-auto bg-white rounded-2xl p-8 border border-gray-100">
+  <h1 class="text-2xl font-bold mb-6">Подтвердите запись</h1>
+  <dl class="space-y-3 text-sm mb-6">
+    <div class="flex justify-between"><dt class="text-gray-500">Услуга</dt><dd class="font-medium">{{ service.name }}</dd></div>
+    <div class="flex justify-between"><dt class="text-gray-500">Мастер</dt><dd class="font-medium">{{ barber.full_name }}</dd></div>
+    <div class="flex justify-between"><dt class="text-gray-500">Дата и время</dt><dd class="font-medium">{{ start_at|date:'d.m.Y H:i' }}</dd></div>
+    <div class="flex justify-between"><dt class="text-gray-500">Длительность</dt><dd class="font-medium">{{ service.duration_minutes }} мин</dd></div>
+    <div class="flex justify-between"><dt class="text-gray-500">Стоимость</dt><dd class="font-semibold text-indigo-600">{{ service.price|floatformat:0 }} ₽</dd></div>
+  </dl>
+  <form method="post">{% csrf_token %}
+    <textarea name="notes" rows="3" placeholder="Пожелания (необязательно)" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm mb-4"></textarea>
+    <button type="submit" class="w-full brand-gradient text-white font-medium rounded-lg py-3">Подтвердить запись</button>
+    <a href="{% url 'bookings:calendar' %}" class="block text-center mt-2 text-sm text-gray-500">Назад</a>
+  </form>
+</div>
+{% endblock %}

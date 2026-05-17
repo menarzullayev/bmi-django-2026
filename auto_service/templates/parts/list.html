@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% block title %}Запчасти{% endblock %}
+
+{% block topbar_actions %}
+<a href="{% url 'parts:new' %}" class="px-4 py-2 rounded-md bg-brand-500 hover:bg-brand-600 text-white text-sm font-medium flex items-center gap-2">
+  <i data-lucide="plus" class="w-4 h-4"></i> Новая запчасть
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+  {% include 'components/kpi_card.html' with label='Всего позиций' value=total icon='package' icon_bg='bg-brand-100 text-brand-600' %}
+  {% include 'components/kpi_card.html' with label='Низкие остатки' value=low_count icon='alert-triangle' icon_bg='bg-red-100 text-red-700' %}
+  {% include 'components/kpi_card.html' with label='Категорий' value=categories.count icon='layers' icon_bg='bg-blue-100 text-blue-700' %}
+</div>
+
+<form method="get" class="bg-white rounded-lg border border-gray-200 p-4 mb-4 grid grid-cols-1 md:grid-cols-4 gap-3 text-sm">
+  <div class="md:col-span-2">
+    <label class="block text-xs text-gray-500 mb-1">Поиск</label>
+    <input type="text" name="q" value="{{ filter_q }}" placeholder="Название, артикул, производитель"
+      class="w-full rounded-md border border-gray-300 px-3 py-2">
+  </div>
+  <div>
+    <label class="block text-xs text-gray-500 mb-1">Категория</label>
+    <select name="category" class="w-full rounded-md border border-gray-300 px-3 py-2">
+      <option value="">— все —</option>
+      {% for c in categories %}
+      <option value="{{ c.pk }}" {% if filter_category == c.pk|stringformat:'s' %}selected{% endif %}>{{ c.name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="flex items-end gap-2">
+    <label class="flex items-center gap-2 text-sm">
+      <input type="checkbox" name="low" value="1" {% if filter_low %}checked{% endif %}>
+      <span>Только низкие</span>
+    </label>
+    <button class="ml-auto px-4 py-2 rounded-md bg-gray-900 text-white">Фильтр</button>
+  </div>
+</form>
+
+<div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+  <div class="overflow-x-auto">
+  <table class="w-full text-sm">
+    <thead class="bg-gray-50 text-xs uppercase text-gray-500">
+      <tr>
+        <th class="px-4 py-2 text-left">Запчасть</th>
+        <th class="px-4 py-2 text-left">Категория</th>
+        <th class="px-4 py-2 text-left">Производитель</th>
+        <th class="px-4 py-2 text-left">Остаток</th>
+        <th class="px-4 py-2 text-right">Точка заказа</th>
+        <th class="px-4 py-2 text-right">Цена</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-gray-100">
+      {% for part in parts %}
+        {% include 'partials/parts_row.html' with part=part %}
+      {% empty %}
+      <tr><td colspan="6" class="px-4 py-8 text-center text-gray-500">Запчасти не найдены</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+{% endblock %}

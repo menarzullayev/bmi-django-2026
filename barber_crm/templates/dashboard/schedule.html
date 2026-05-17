@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% load dict_extras %}
+{% block title %}Расписание — {{ BRAND_NAME }}{% endblock %}
+{% block content %}
+<h1 class="text-3xl font-bold mb-6">Расписание на неделю</h1>
+<div class="grid grid-cols-1 md:grid-cols-7 gap-3">
+  {% for d in days %}
+    <div class="bg-white rounded-xl p-3 border border-gray-100 min-h-[200px]">
+      <div class="text-xs text-gray-500 uppercase">{{ d|date:'l' }}</div>
+      <div class="font-semibold mb-2">{{ d|date:'d.m' }}</div>
+      <div class="space-y-2">
+        {% for a in grid|get_item:d %}
+          <div class="text-xs bg-indigo-50 text-indigo-700 rounded p-2">
+            <div class="font-medium">{{ a.start_at|date:'H:i' }} {{ a.service.name }}</div>
+            <div>{{ a.client.full_name }} · {{ a.barber.full_name }}</div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  {% endfor %}
+</div>
+{% endblock %}

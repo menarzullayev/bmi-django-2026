@@ -1,0 +1,11 @@
+{% if results %}
+<div class="border border-slate-200 rounded-md bg-white shadow-sm max-h-56 overflow-y-auto">
+  {% for c in results %}
+  <div class="px-3 py-2 hover:bg-cyan-50 cursor-pointer border-b last:border-0"
+       onclick='pickCustomer("{{ c.phone|escapejs }}", "{{ c.full_name|escapejs }}", "{{ c.address|escapejs }}")'>
+    <div class="font-semibold text-sm">{{ c.full_name }}</div>
+    <div class="text-xs text-slate-500">{{ c.phone }} · {{ c.address|default:"—" }}</div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}

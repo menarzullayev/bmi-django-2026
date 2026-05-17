@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% block title %}Панель — {{ BRAND_NAME }}{% endblock %}
+{% block content %}
+<h1 class="text-3xl font-bold mb-6">Панель управления</h1>
+
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+  <div class="bg-white rounded-2xl p-5 border border-gray-100">
+    <div class="text-xs text-gray-500 uppercase">Записей сегодня</div>
+    <div class="text-3xl font-bold mt-2">{{ appts_today }}</div>
+  </div>
+  <div class="bg-white rounded-2xl p-5 border border-gray-100">
+    <div class="text-xs text-gray-500 uppercase">Выручка сегодня</div>
+    <div class="text-3xl font-bold mt-2 text-indigo-600">{{ revenue_today|floatformat:0 }} ₽</div>
+  </div>
+  <div class="bg-white rounded-2xl p-5 border border-gray-100">
+    <div class="text-xs text-gray-500 uppercase">В очереди</div>
+    <div class="text-3xl font-bold mt-2 text-amber-600">{{ queue_count }}</div>
+  </div>
+  <div class="bg-white rounded-2xl p-5 border border-gray-100">
+    <div class="text-xs text-gray-500 uppercase">Топ мастер</div>
+    <div class="text-lg font-semibold mt-2">{{ top_barber.full_name|default:'—' }}</div>
+    <div class="text-xs text-amber-500">★ {{ top_barber.rating|default:'—' }}</div>
+  </div>
+</div>
+
+<div class="grid md:grid-cols-3 gap-4 mb-8">
+  <a href="{% url 'liveline:schedule' %}" class="bg-white rounded-xl p-4 border border-gray-100 hover:shadow text-center">Расписание</a>
+  <a href="{% url 'liveline:queue' %}" class="bg-white rounded-xl p-4 border border-gray-100 hover:shadow text-center">Очередь</a>
+  <a href="{% url 'liveline:clients' %}" class="bg-white rounded-xl p-4 border border-gray-100 hover:shadow text-center">Клиенты</a>
+</div>
+
+<section class="bg-white rounded-2xl p-6 border border-gray-100">
+  <h2 class="text-lg font-semibold mb-4">Последние записи</h2>
+  <div class="overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead>
+        <tr class="text-left text-gray-500 border-b border-gray-100">
+          <th class="py-2">Клиент</th><th>Услуга</th><th>Мастер</th><th>Время</th><th>Статус</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for a in recent_appts %}
+          <tr class="border-b border-gray-50">
+            <td class="py-2">{{ a.client.full_name }}</td>
+            <td>{{ a.service.name }}</td>
+            <td>{{ a.barber.full_name }}</td>
+            <td>{{ a.start_at|date:'d.m H:i' }}</td>
+            <td><span class="text-xs px-2 py-0.5 rounded-full {{ a.badge_classes }}">{{ a.get_status_display }}</span></td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="5" class="py-4 text-gray-400 text-center">Нет записей</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

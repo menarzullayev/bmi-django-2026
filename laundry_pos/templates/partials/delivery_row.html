@@ -1,0 +1,21 @@
+<tr id="assign-{{ a.pk }}" class="border-b last:border-0">
+  <td class="py-2 font-bold">{{ a.order }}</td>
+  <td><a class="text-cyan-700 hover:underline font-mono text-xs" href="{% url 'tickets:detail' a.ticket.pk %}">{{ a.ticket.ticket_number }}</a></td>
+  <td>{{ a.ticket.customer.full_name }}<div class="text-xs text-slate-500">{{ a.ticket.customer.phone }}</div></td>
+  <td class="text-xs">{{ a.address }}</td>
+  <td class="text-xs">{% if a.time_window_start %}{{ a.time_window_start|time:"H:i" }}–{{ a.time_window_end|time:"H:i" }}{% else %}—{% endif %}</td>
+  <td>
+    {% if a.status == 'delivered' %}<span class="chip bg-green-100 text-green-800">Доставлено</span>
+    {% elif a.status == 'failed' %}<span class="chip bg-red-100 text-red-800">Не доставлено</span>
+    {% else %}<span class="chip bg-amber-100 text-amber-800">Ожидает</span>{% endif %}
+  </td>
+  <td class="text-right">
+    {% if a.status != 'delivered' %}
+    <button class="btn btn-primary text-xs py-1"
+            hx-post="{% url 'delivery:assignment_deliver' a.pk %}" hx-target="#assign-{{ a.pk }}" hx-swap="outerHTML"
+            hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+      <i data-lucide="check" class="w-3 h-3"></i> Доставлено
+    </button>
+    {% endif %}
+  </td>
+</tr>

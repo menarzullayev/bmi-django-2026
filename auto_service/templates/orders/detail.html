@@ -1,0 +1,194 @@
+{% extends 'base.html' %}
+{% block title %}{{ order.order_number }}{% endblock %}
+
+{% block topbar_actions %}
+{% if order.invoice_id or order.invoice %}
+<a href="{% url 'billing:detail' order.invoice.pk %}" class="px-3 py-2 rounded-md border border-gray-300 text-gray-700 text-sm flex items-center gap-2">
+  <i data-lucide="receipt" class="w-4 h-4"></i> Счёт
+</a>
+{% endif %}
+{% if order.can_advance %}
+<form method="post" action="{% url 'workorders:transition' order.pk %}">{% csrf_token %}
+  <button class="px-4 py-2 rounded-md bg-brand-500 hover:bg-brand-600 text-white text-sm font-medium flex items-center gap-2">
+    <i data-lucide="arrow-right" class="w-4 h-4"></i> Следующий этап
+  </button>
+</form>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+  <div class="lg:col-span-2 space-y-4">
+
+    <div class="bg-white rounded-lg border border-gray-200 p-5">
+      <div class="flex items-start justify-between flex-wrap gap-3">
+        <div>
+          <div class="text-xs uppercase tracking-wider text-gray-500">Заказ-наряд</div>
+          <h2 class="text-xl font-bold">{{ order.order_number }}</h2>
+          <div class="mt-2 flex items-center gap-2 flex-wrap">
+            {% include 'components/status_badge.html' with order=order %}
+            {% include 'components/priority_chip.html' with order=order %}
+            <span class="text-xs text-gray-500">принят {{ order.received_at|date:"d.m.Y H:i" }}</span>
+          </div>
+        </div>
+        <div class="text-right text-sm">
+          <div class="text-xs text-gray-500">Итого</div>
+          <div class="text-2xl font-bold text-gray-900">{{ order.grand_total|floatformat:2 }} <span class="text-base text-gray-500">сум</span></div>
+          <div class="text-xs text-gray-500">Работы: {{ order.labor_total|floatformat:2 }} · Запчасти: {{ order.parts_total|floatformat:2 }}</div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-5 text-sm">
+        <div>
+          <div class="text-xs text-gray-500">Клиент</div>
+          <a href="{% url 'customers:detail' order.vehicle.customer.pk %}" class="text-brand-600 hover:underline">{{ order.vehicle.customer.name }}</a>
+          <div class="text-xs text-gray-500">{{ order.vehicle.customer.phone }}</div>
+        </div>
+        <div>
+          <div class="text-xs text-gray-500">Автомобиль</div>
+          <div class="font-medium">{{ order.vehicle.make }} {{ order.vehicle.model }}</div>
+          <div class="text-xs text-gray-500">{{ order.vehicle.plate }} · {{ order.vehicle.year }}</div>
+        </div>
+        <div>
+          <div class="text-xs text-gray-500">Механик</div>
+          <div class="font-medium">{{ order.assigned_mechanic.get_full_name|default:'—' }}</div>
+        </div>
+        <div>
+          <div class="text-xs text-gray-500">Пробег</div>
+          <div class="font-medium">{{ order.mileage_at_intake }} км</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-lg border border-gray-200 p-5">
+      <h3 class="font-semibold mb-2">Описание проблемы</h3>
+      <p class="text-sm text-gray-700 whitespace-pre-wrap">{{ order.problem_description }}</p>
+      {% if order.diagnosis_notes %}
+        <h4 class="font-semibold mt-4 mb-1 text-sm">Диагностика</h4>
+        <p class="text-sm text-gray-700 whitespace-pre-wrap">{{ order.diagnosis_notes }}</p>
+      {% endif %}
+    </div>
+
+    <div class="bg-white rounded-lg border border-gray-200">
+      <div class="px-5 py-4 border-b border-gray-200 flex items-center justify-between">
+        <h3 class="font-semibold">Работы</h3>
+        <span class="text-xs text-gray-500">{{ tasks|length }} шт</span>
+      </div>
+      <table class="w-full text-sm">
+        <thead class="bg-gray-50 text-xs uppercase text-gray-500">
+          <tr>
+            <th class="px-4 py-2 text-left">Описание</th>
+            <th class="px-4 py-2 text-left">Механик</th>
+            <th class="px-4 py-2 text-left">Статус</th>
+            <th class="px-4 py-2 text-right">Часы</th>
+            <th class="px-4 py-2 text-right">Сумма</th>
+          </tr>
+        </thead>
+        <tbody id="tasks-tbody" class="divide-y divide-gray-100">
+          {% for t in tasks %}
+            {% include 'partials/task_row.html' with task=t order=order %}
+          {% empty %}
+            <tr><td colspan="5" class="px-4 py-6 text-center text-gray-500">Работы не добавлены</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <form class="px-4 py-3 border-t border-gray-200 grid grid-cols-1 md:grid-cols-6 gap-2 text-sm bg-gray-50"
+            hx-post="{% url 'workorders:add_task' order.pk %}"
+            hx-target="#tasks-tbody"
+            hx-swap="beforeend"
+            hx-on::after-request="this.reset()">
+        {% csrf_token %}
+        <input name="description" required placeholder="Описание работы"
+          class="md:col-span-3 rounded-md border border-gray-300 px-3 py-2">
+        <select name="mechanic" class="rounded-md border border-gray-300 px-3 py-2">
+          <option value="">Без механика</option>
+          {% for m in mechanics_all %}
+          <option value="{{ m.pk }}">{{ m.get_full_name|default:m.username }}</option>
+          {% endfor %}
+        </select>
+        <input name="estimated_hours" type="number" step="0.25" min="0" placeholder="Часы"
+          class="rounded-md border border-gray-300 px-3 py-2">
+        <button class="rounded-md bg-brand-500 hover:bg-brand-600 text-white font-medium flex items-center justify-center gap-2">
+          <i data-lucide="plus" class="w-4 h-4"></i> Добавить
+        </button>
+      </form>
+    </div>
+
+    <div class="bg-white rounded-lg border border-gray-200">
+      <div class="px-5 py-4 border-b border-gray-200 flex items-center justify-between">
+        <h3 class="font-semibold">Использованные запчасти</h3>
+        <span class="text-xs text-gray-500">{{ part_usages|length }} позиций</span>
+      </div>
+      <table class="w-full text-sm">
+        <thead class="bg-gray-50 text-xs uppercase text-gray-500">
+          <tr>
+            <th class="px-4 py-2 text-left">Запчасть</th>
+            <th class="px-4 py-2 text-right">Кол-во</th>
+            <th class="px-4 py-2 text-right">Цена</th>
+            <th class="px-4 py-2 text-right">Сумма</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          {% for u in part_usages %}
+          <tr>
+            <td class="px-4 py-2">{{ u.part.name }} <span class="text-xs text-gray-500">{{ u.part.sku }}</span></td>
+            <td class="px-4 py-2 text-right">{{ u.quantity }}</td>
+            <td class="px-4 py-2 text-right">{{ u.unit_price|floatformat:2 }}</td>
+            <td class="px-4 py-2 text-right font-medium">{{ u.line_total|floatformat:2 }}</td>
+          </tr>
+          {% empty %}
+            <tr><td colspan="4" class="px-4 py-6 text-center text-gray-500">Запчасти не добавлены</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <form method="post" action="{% url 'workorders:add_part' order.pk %}"
+            class="px-4 py-3 border-t border-gray-200 grid grid-cols-1 md:grid-cols-5 gap-2 text-sm bg-gray-50">
+        {% csrf_token %}
+        <select name="part" required class="md:col-span-3 rounded-md border border-gray-300 px-3 py-2">
+          <option value="">— выбрать запчасть —</option>
+          {% for p in parts_all %}
+          <option value="{{ p.pk }}">{{ p.name }} ({{ p.sku }}) — {{ p.quantity_in_stock }} шт</option>
+          {% endfor %}
+        </select>
+        <input name="quantity" type="number" min="1" value="1"
+          class="rounded-md border border-gray-300 px-3 py-2">
+        <button class="rounded-md bg-brand-500 hover:bg-brand-600 text-white font-medium flex items-center justify-center gap-2">
+          <i data-lucide="plus" class="w-4 h-4"></i> Добавить
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <div class="space-y-4">
+    <div class="bg-white rounded-lg border border-gray-200 p-5">
+      <h3 class="font-semibold mb-3">Этапы</h3>
+      <ol class="space-y-2 text-sm">
+        {% for code, label in order.STATUS_CHOICES %}
+        {% if code != 'cancelled' %}
+        <li class="flex items-center gap-3">
+          <span class="w-2 h-2 rounded-full
+            {% if code == order.status %}bg-brand-500{% else %}bg-gray-300{% endif %}"></span>
+          <span class="{% if code == order.status %}font-semibold text-gray-900{% else %}text-gray-500{% endif %}">{{ label }}</span>
+        </li>
+        {% endif %}
+        {% endfor %}
+      </ol>
+    </div>
+
+    <div class="bg-white rounded-lg border border-gray-200 p-5 text-sm">
+      <h3 class="font-semibold mb-3">Метаданные</h3>
+      <dl class="space-y-2">
+        <div class="flex justify-between"><dt class="text-gray-500">Создан</dt><dd>{{ order.created_by.get_full_name|default:order.created_by.username }}</dd></div>
+        <div class="flex justify-between"><dt class="text-gray-500">Получен</dt><dd>{{ order.received_at|date:"d.m.Y H:i" }}</dd></div>
+        {% if order.expected_ready_at %}
+        <div class="flex justify-between"><dt class="text-gray-500">Готовность</dt><dd>{{ order.expected_ready_at|date:"d.m.Y H:i" }}</dd></div>
+        {% endif %}
+        {% if order.completed_at %}
+        <div class="flex justify-between"><dt class="text-gray-500">Завершён</dt><dd>{{ order.completed_at|date:"d.m.Y H:i" }}</dd></div>
+        {% endif %}
+        <div class="flex justify-between"><dt class="text-gray-500">Предв. сумма</dt><dd>{{ order.estimated_cost|floatformat:2 }}</dd></div>
+      </dl>
+    </div>
+  </div>
+</div>
+{% endblock %}

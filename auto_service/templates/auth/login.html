@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Вход — {{ BMI.app_name }}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>html,body{font-family:'Inter',system-ui,sans-serif}</style>
+</head>
+<body class="min-h-screen bg-gray-900 flex items-center justify-center p-4">
+  <div class="grid md:grid-cols-2 max-w-4xl w-full bg-white rounded-xl shadow-2xl overflow-hidden">
+    <div class="hidden md:flex flex-col justify-between p-10 bg-gradient-to-br from-gray-800 to-gray-900 text-white">
+      <div>
+        <div class="flex items-center gap-3 mb-8">
+          <div class="w-10 h-10 rounded-lg bg-brand-500 flex items-center justify-center">
+            <i data-lucide="wrench" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <div class="font-bold text-lg">АвтоService ERP</div>
+            <div class="text-xs text-gray-400">Управление автосервисом</div>
+          </div>
+        </div>
+        <h2 class="text-2xl font-semibold leading-tight">Заказ-наряды.<br>Запчасти.<br>Клиенты.</h2>
+        <p class="text-sm text-gray-400 mt-3">Единая система управления цехом, складом и продажами.</p>
+      </div>
+      <div class="text-xs text-gray-500 space-y-1">
+        <p>Дипломная работа</p>
+        <p>Студент: Бахронкулов Ш. И.</p>
+        <p>Группа: DI-O22-04</p>
+        <p>Руководитель: Убайдуллаев М.</p>
+      </div>
+    </div>
+
+    <div class="p-10">
+      <h1 class="text-2xl font-bold text-gray-900">Вход в систему</h1>
+      <p class="text-sm text-gray-500 mt-1">Введите учётные данные для доступа.</p>
+
+      <form method="post" class="mt-8 space-y-4">
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+          <div class="px-3 py-2 rounded-md bg-red-100 text-red-800 text-sm">
+            {{ form.non_field_errors|first }}
+          </div>
+        {% endif %}
+        <div>
+          <label class="block text-xs font-medium text-gray-700 mb-1" for="id_username">Логин</label>
+          <input type="text" name="username" id="id_username" autofocus required
+            class="block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:border-brand-500 focus:ring-brand-500">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-700 mb-1" for="id_password">Пароль</label>
+          <input type="password" name="password" id="id_password" required
+            class="block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:border-brand-500 focus:ring-brand-500">
+        </div>
+        <button type="submit"
+          class="w-full px-4 py-2 rounded-md bg-brand-500 hover:bg-brand-600 text-white font-medium transition flex items-center justify-center gap-2">
+          <i data-lucide="log-in" class="w-4 h-4"></i> Войти
+        </button>
+      </form>
+
+      <div class="mt-6 p-3 bg-gray-50 rounded-md text-xs text-gray-600">
+        <div class="font-medium text-gray-700 mb-1">Демо-учётные записи:</div>
+        <div>admin / admin123 — администратор</div>
+        <div>reception / admin123 — приёмщик</div>
+        <div>mechanic1 / admin123 — механик</div>
+      </div>
+    </div>
+  </div>
+  <script>lucide.createIcons();</script>
+</body>
+</html>

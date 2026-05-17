@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% block title %}Заказ-наряды{% endblock %}
+
+{% block topbar_actions %}
+<a href="{% url 'workorders:new' %}" class="px-4 py-2 rounded-md bg-brand-500 hover:bg-brand-600 text-white text-sm font-medium flex items-center gap-2">
+  <i data-lucide="plus" class="w-4 h-4"></i> Новый заказ
+</a>
+{% endblock %}
+
+{% block content %}
+<form method="get" class="bg-white rounded-lg border border-gray-200 p-4 mb-4 grid grid-cols-1 md:grid-cols-5 gap-3 text-sm">
+  <div class="md:col-span-2">
+    <label class="block text-xs text-gray-500 mb-1">Поиск</label>
+    <input type="text" name="q" value="{{ filter_q }}" placeholder="Номер, ГРЗ или клиент"
+      class="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-brand-500 focus:ring-brand-500">
+  </div>
+  <div>
+    <label class="block text-xs text-gray-500 mb-1">Статус</label>
+    <select name="status" class="w-full rounded-md border border-gray-300 px-3 py-2">
+      <option value="">— любой —</option>
+      {% for code, label in statuses %}
+      <option value="{{ code }}" {% if filter_status == code %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div>
+    <label class="block text-xs text-gray-500 mb-1">Приоритет</label>
+    <select name="priority" class="w-full rounded-md border border-gray-300 px-3 py-2">
+      <option value="">— любой —</option>
+      {% for code, label in priorities %}
+      <option value="{{ code }}" {% if filter_priority == code %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div>
+    <label class="block text-xs text-gray-500 mb-1">Механик</label>
+    <select name="mechanic" class="w-full rounded-md border border-gray-300 px-3 py-2">
+      <option value="">— любой —</option>
+      {% for m in mechanics_all %}
+      <option value="{{ m.pk }}" {% if filter_mechanic == m.pk|stringformat:'s' %}selected{% endif %}>{{ m.get_full_name|default:m.username }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="md:col-span-5 flex justify-end gap-2">
+    <a href="{% url 'workorders:list' %}" class="px-3 py-2 rounded-md border border-gray-300 text-gray-700 text-sm">Сбросить</a>
+    <button type="submit" class="px-4 py-2 rounded-md bg-gray-900 hover:bg-gray-800 text-white text-sm flex items-center gap-2">
+      <i data-lucide="filter" class="w-4 h-4"></i> Применить
+    </button>
+  </div>
+</form>
+
+<div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+  <div class="px-4 py-3 border-b border-gray-200 flex items-center justify-between text-sm">
+    <span class="text-gray-600">Найдено: <b>{{ total }}</b></span>
+  </div>
+  <div class="overflow-x-auto">
+  <table class="w-full text-sm">
+    <thead class="bg-gray-50 text-xs uppercase text-gray-500">
+      <tr>
+        <th class="px-4 py-2 text-left">Номер</th>
+        <th class="px-4 py-2 text-left">Клиент</th>
+        <th class="px-4 py-2 text-left">Авто</th>
+        <th class="px-4 py-2 text-left">Механик</th>
+        <th class="px-4 py-2 text-left">Статус</th>
+        <th class="px-4 py-2 text-left">Приоритет</th>
+        <th class="px-4 py-2 text-left">Принят</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-gray-100">
+      {% for o in orders %}
+      <tr class="hover:bg-gray-50">
+        <td class="px-4 py-2"><a href="{% url 'workorders:detail' o.pk %}" class="text-brand-600 hover:underline font-medium">{{ o.order_number }}</a></td>
+        <td class="px-4 py-2">{{ o.vehicle.customer.name }}</td>
+        <td class="px-4 py-2">{{ o.vehicle.make }} {{ o.vehicle.model }} <span class="text-xs text-gray-500">{{ o.vehicle.plate }}</span></td>
+        <td class="px-4 py-2 text-gray-700">{{ o.assigned_mechanic.get_full_name|default:'—' }}</td>
+        <td class="px-4 py-2">{% include 'components/status_badge.html' with order=o %}</td>
+        <td class="px-4 py-2">{% include 'components/priority_chip.html' with order=o %}</td>
+        <td class="px-4 py-2 text-gray-500 text-xs">{{ o.received_at|date:"d.m.Y H:i" }}</td>
+      </tr>
+      {% empty %}
+      <tr><td class="px-4 py-8 text-center text-gray-500" colspan="7">Заказы не найдены</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+{% endblock %}

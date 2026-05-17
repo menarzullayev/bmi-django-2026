@@ -1,0 +1,67 @@
+{% load static %}
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Химчистка POS{% endblock %} — {{ APP_NAME }}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/htmx.org@2.0.3"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    body { font-family: 'Nunito', system-ui, sans-serif; }
+    .chip { display:inline-flex; align-items:center; padding:.15rem .6rem; border-radius:.375rem; font-weight:600; font-size:.75rem; }
+    .btn { display:inline-flex; align-items:center; gap:.4rem; padding:.5rem .9rem; border-radius:.375rem; font-weight:700; transition:all .15s; }
+    .btn-primary { background:#0891b2; color:white; }
+    .btn-primary:hover { background:#0e7490; }
+    .btn-ghost { background:#e0f2fe; color:#0c4a6e; }
+    .btn-ghost:hover { background:#bae6fd; }
+    .btn-danger { background:#dc2626; color:white; }
+    .btn-danger:hover { background:#b91c1c; }
+    .card { background:white; border-radius:.5rem; box-shadow:0 1px 3px rgba(0,0,0,.08); padding:1.25rem; }
+    .input { width:100%; padding:.5rem .75rem; border:1px solid #cbd5e1; border-radius:.375rem; font-size:.9rem; }
+    .input:focus { outline:none; border-color:#0891b2; box-shadow:0 0 0 3px rgba(8,145,178,.15); }
+    @media print {
+      .no-print { display:none !important; }
+    }
+  </style>
+  {% block extra_head %}{% endblock %}
+</head>
+<body class="bg-slate-50 text-slate-800 font-['Nunito']">
+  {% if user.is_authenticated %}
+    {% include 'components/topbar.html' %}
+  {% endif %}
+
+  {% if messages %}
+    <div class="max-w-7xl mx-auto px-4 mt-3 space-y-2 no-print">
+      {% for m in messages %}
+        <div class="rounded-md px-4 py-2 text-sm
+          {% if m.tags == 'error' %}bg-red-100 text-red-800{% elif m.tags == 'success' %}bg-green-100 text-green-800{% else %}bg-cyan-100 text-cyan-800{% endif %}">
+          {{ m }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <main class="max-w-7xl mx-auto px-4 py-6">
+    {% block content %}{% endblock %}
+  </main>
+
+  {% include 'components/footer.html' %}
+
+  <script>
+    lucide.createIcons();
+    function tick() {
+      const el = document.getElementById('clock');
+      if (el) {
+        const d = new Date();
+        el.textContent = d.toLocaleTimeString('ru-RU', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+      }
+    }
+    setInterval(tick, 1000); tick();
+    document.addEventListener('htmx:afterSwap', () => lucide.createIcons());
+  </script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

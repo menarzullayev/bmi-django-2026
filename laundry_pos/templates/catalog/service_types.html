@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block title %}Услуги{% endblock %}
+{% block content %}
+<div class="flex items-center justify-between mb-4">
+  <h1 class="text-2xl font-extrabold flex items-center gap-2"><i data-lucide="sparkles" class="w-7 h-7 text-cyan-700"></i> Виды услуг</h1>
+  <a href="{% url 'pricing:matrix' %}" class="btn btn-ghost"><i data-lucide="arrow-left" class="w-4 h-4"></i> К прайсу</a>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+  <div class="card lg:col-span-2">
+    <table class="w-full text-sm">
+      <thead><tr class="text-left text-xs uppercase text-slate-500 border-b"><th class="py-2">Наименование</th><th>Код</th><th>Описание</th></tr></thead>
+      <tbody>
+        {% for s in service_types %}
+        <tr class="border-b last:border-0"><td class="py-2">{{ s.name }}</td><td class="font-mono text-xs">{{ s.code }}</td><td class="text-xs">{{ s.description }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="card">
+    <h3 class="font-bold mb-3">Добавить услугу</h3>
+    <form method="post" class="space-y-2">{% csrf_token %}
+      <input class="input" name="name" placeholder="Наименование" required>
+      <input class="input" name="code" placeholder="Код (англ)">
+      <input class="input" name="description" placeholder="Описание">
+      <button class="btn btn-primary w-full justify-center"><i data-lucide="plus" class="w-4 h-4"></i> Добавить</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

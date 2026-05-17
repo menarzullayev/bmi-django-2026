@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% block title %}Мои записи — {{ BRAND_NAME }}{% endblock %}
+{% block content %}
+<h1 class="text-3xl font-bold mb-6">Мои записи</h1>
+
+<div x-data class="grid md:grid-cols-2 gap-6">
+  <section>
+    <h2 class="text-lg font-semibold mb-3">Предстоящие ({{ upcoming|length }})</h2>
+    <div class="space-y-3">
+      {% for a in upcoming %}
+        <div class="bg-white rounded-xl p-4 border border-gray-100">
+          <div class="flex items-start justify-between mb-2">
+            <div>
+              <div class="font-semibold">{{ a.service.name }}</div>
+              <div class="text-sm text-gray-500">{{ a.barber.full_name }}</div>
+            </div>
+            <span class="text-xs px-2 py-1 rounded-full {{ a.badge_classes }}">{{ a.get_status_display }}</span>
+          </div>
+          <div class="text-sm text-gray-700">{{ a.start_at|date:'d.m.Y H:i' }} · {{ a.duration_minutes }} мин</div>
+          <div class="text-sm font-medium text-indigo-600 mt-1">{{ a.service.price|floatformat:0 }} ₽</div>
+        </div>
+      {% empty %}
+        <p class="text-gray-500 text-sm">Нет предстоящих записей. <a href="{% url 'bookings:calendar' %}" class="text-indigo-600">Записаться</a></p>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section>
+    <h2 class="text-lg font-semibold mb-3">Прошедшие ({{ past|length }})</h2>
+    <div class="space-y-3">
+      {% for a in past %}
+        <div class="bg-white rounded-xl p-4 border border-gray-100 opacity-90">
+          <div class="flex items-start justify-between mb-2">
+            <div>
+              <div class="font-semibold">{{ a.service.name }}</div>
+              <div class="text-sm text-gray-500">{{ a.barber.full_name }}</div>
+            </div>
+            <span class="text-xs px-2 py-1 rounded-full {{ a.badge_classes }}">{{ a.get_status_display }}</span>
+          </div>
+          <div class="text-sm text-gray-700">{{ a.start_at|date:'d.m.Y H:i' }}</div>
+        </div>
+      {% empty %}
+        <p class="text-gray-500 text-sm">Пока пусто.</p>
+      {% endfor %}
+    </div>
+  </section>
+</div>
+{% endblock %}

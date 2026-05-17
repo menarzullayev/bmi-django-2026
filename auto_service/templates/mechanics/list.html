@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block title %}Механики{% endblock %}
+
+{% block content %}
+<div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+  <div class="px-4 py-3 border-b border-gray-200 text-sm text-gray-600">
+    Всего механиков: <b>{{ mechanics|length }}</b>
+  </div>
+  <table class="w-full text-sm">
+    <thead class="bg-gray-50 text-xs uppercase text-gray-500">
+      <tr>
+        <th class="px-4 py-2 text-left">Механик</th>
+        <th class="px-4 py-2 text-left">Специализация</th>
+        <th class="px-4 py-2 text-left">Телефон</th>
+        <th class="px-4 py-2 text-right">Активные заказы</th>
+        <th class="px-4 py-2 text-right">Завершено за 7 дн</th>
+        <th class="px-4 py-2 text-right">Часов за 7 дн</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-gray-100">
+      {% for m in mechanics %}
+      <tr class="hover:bg-gray-50">
+        <td class="px-4 py-2">
+          <a href="{% url 'mechanics:detail' m.pk %}" class="font-medium text-brand-600 hover:underline">
+            {{ m.get_full_name|default:m.username }}
+          </a>
+        </td>
+        <td class="px-4 py-2 text-gray-700">{{ m.specialty|default:'—' }}</td>
+        <td class="px-4 py-2 text-gray-700">{{ m.phone|default:'—' }}</td>
+        <td class="px-4 py-2 text-right">
+          <span class="px-2 py-0.5 rounded text-xs font-semibold bg-brand-100 text-brand-700">{{ m.active_orders }}</span>
+        </td>
+        <td class="px-4 py-2 text-right text-gray-700">{{ m.completed_orders }}</td>
+        <td class="px-4 py-2 text-right text-gray-700">{{ m.hours_week|default:'0' }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="6" class="px-4 py-8 text-center text-gray-500">Механиков нет</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

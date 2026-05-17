@@ -1,0 +1,26 @@
+<tr id="part-row-{{ part.pk }}" class="hover:bg-gray-50">
+  <td class="px-4 py-2">
+    <a href="{% url 'parts:detail' part.pk %}" class="font-medium text-brand-600 hover:underline">{{ part.name }}</a>
+    <div class="text-xs text-gray-500">{{ part.sku }}</div>
+  </td>
+  <td class="px-4 py-2 text-gray-700">{{ part.category.name }}</td>
+  <td class="px-4 py-2 text-gray-700">{{ part.brand|default:'—' }}</td>
+  <td class="px-4 py-2">
+    <div class="flex items-center gap-2">
+      <form hx-post="{% url 'parts:adjust' part.pk %}" hx-target="#part-row-{{ part.pk }}" hx-swap="outerHTML">
+        {% csrf_token %}<input type="hidden" name="delta" value="-1">
+        <button class="w-7 h-7 rounded bg-red-100 text-red-700 hover:bg-red-200 font-bold">−</button>
+      </form>
+      <span class="px-2 py-0.5 rounded text-xs font-semibold
+        {% if part.is_low_stock %}bg-red-100 text-red-700{% else %}bg-green-100 text-green-700{% endif %}">
+        {{ part.quantity_in_stock }} шт
+      </span>
+      <form hx-post="{% url 'parts:adjust' part.pk %}" hx-target="#part-row-{{ part.pk }}" hx-swap="outerHTML">
+        {% csrf_token %}<input type="hidden" name="delta" value="1">
+        <button class="w-7 h-7 rounded bg-green-100 text-green-700 hover:bg-green-200 font-bold">+</button>
+      </form>
+    </div>
+  </td>
+  <td class="px-4 py-2 text-right">{{ part.reorder_level }}</td>
+  <td class="px-4 py-2 text-right">{{ part.unit_price|floatformat:2 }}</td>
+</tr>

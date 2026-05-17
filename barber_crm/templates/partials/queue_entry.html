@@ -1,0 +1,29 @@
+<div id="queue-entry-{{ entry.id }}" class="bg-white border border-gray-100 rounded-xl p-3">
+  <div class="flex items-start justify-between mb-2">
+    <div>
+      <div class="font-medium">{{ entry.client.full_name }}</div>
+      <div class="text-xs text-gray-500">{{ entry.joined_at|date:'H:i' }}{% if entry.preferred_barber %} · к {{ entry.preferred_barber.full_name }}{% endif %}</div>
+    </div>
+    <span class="text-xs px-2 py-0.5 rounded-full {{ entry.badge_classes }}">{{ entry.get_status_display }}</span>
+  </div>
+  <div class="flex gap-1 flex-wrap">
+    {% if entry.status == 'waiting' %}
+      <form hx-post="{% url 'liveline:queue_status' entry.id %}" hx-target="#queue-entry-{{ entry.id }}" hx-swap="outerHTML">{% csrf_token %}
+        <input type="hidden" name="status" value="being_served">
+        <button class="text-xs px-2 py-1 rounded bg-indigo-50 text-indigo-700">Принять</button>
+      </form>
+    {% endif %}
+    {% if entry.status == 'being_served' %}
+      <form hx-post="{% url 'liveline:queue_status' entry.id %}" hx-target="#queue-entry-{{ entry.id }}" hx-swap="outerHTML">{% csrf_token %}
+        <input type="hidden" name="status" value="done">
+        <button class="text-xs px-2 py-1 rounded bg-emerald-50 text-emerald-700">Завершить</button>
+      </form>
+    {% endif %}
+    {% if entry.status != 'cancelled' and entry.status != 'done' %}
+      <form hx-post="{% url 'liveline:queue_status' entry.id %}" hx-target="#queue-entry-{{ entry.id }}" hx-swap="outerHTML">{% csrf_token %}
+        <input type="hidden" name="status" value="cancelled">
+        <button class="text-xs px-2 py-1 rounded bg-rose-50 text-rose-700">Отменить</button>
+      </form>
+    {% endif %}
+  </div>
+</div>

@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% block title %}Квитанции{% endblock %}
+{% block content %}
+<div class="flex items-center justify-between mb-4">
+  <h1 class="text-2xl font-extrabold flex items-center gap-2"><i data-lucide="receipt" class="w-7 h-7 text-cyan-700"></i> Квитанции</h1>
+  <a href="{% url 'intake:new' %}" class="btn btn-primary"><i data-lucide="plus" class="w-4 h-4"></i> Новая</a>
+</div>
+
+<form class="card mb-4" method="get">
+  <div class="grid grid-cols-1 md:grid-cols-5 gap-3 items-end">
+    <div>
+      <label class="text-xs font-semibold uppercase text-slate-500">Статус</label>
+      <select class="input" name="status">
+        <option value="">— все —</option>
+        {% for code, label in status_choices %}
+        <option value="{{ code }}" {% if filters.status == code %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label class="text-xs font-semibold uppercase text-slate-500">Телефон</label>
+      <input class="input" name="phone" value="{{ filters.phone }}">
+    </div>
+    <div>
+      <label class="text-xs font-semibold uppercase text-slate-500">С даты</label>
+      <input class="input" type="date" name="date_from" value="{{ filters.date_from }}">
+    </div>
+    <div>
+      <label class="text-xs font-semibold uppercase text-slate-500">По дату</label>
+      <input class="input" type="date" name="date_to" value="{{ filters.date_to }}">
+    </div>
+    <div><button class="btn btn-primary w-full justify-center"><i data-lucide="filter" class="w-4 h-4"></i> Применить</button></div>
+  </div>
+</form>
+
+<div class="card">
+  <table class="w-full text-sm">
+    <thead>
+      <tr class="text-left text-xs uppercase text-slate-500 border-b">
+        <th class="py-2">№</th><th>Принято</th><th>Клиент</th><th>Статус</th><th class="text-right">Итого</th><th class="text-right">Оплачено</th><th>Кассир</th><th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for t in tickets %}
+      <tr class="border-b last:border-0 hover:bg-slate-50">
+        <td class="py-2 font-mono text-xs">{{ t.ticket_number }}</td>
+        <td class="text-xs">{{ t.received_at|date:"d.m.Y H:i" }}</td>
+        <td>{{ t.customer.full_name }}<div class="text-xs text-slate-400">{{ t.customer.phone }}</div></td>
+        <td><span class="chip {{ t.status_color }}">{{ t.get_status_display }}</span></td>
+        <td class="text-right font-semibold">{{ t.total|floatformat:0 }}</td>
+        <td class="text-right">{{ t.amount_paid|floatformat:0 }}</td>
+        <td class="text-xs">{{ t.cashier.display_name }}</td>
+        <td class="text-right"><a class="text-cyan-700 hover:underline text-xs" href="{% url 'tickets:detail' t.pk %}">Открыть →</a></td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="8" class="py-6 text-center text-slate-400">Ничего не найдено</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

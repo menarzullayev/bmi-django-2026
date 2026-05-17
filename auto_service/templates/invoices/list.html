@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block title %}Счета{% endblock %}
+
+{% block content %}
+<form method="get" class="bg-white rounded-lg border border-gray-200 p-4 mb-4 grid grid-cols-1 md:grid-cols-4 gap-3 text-sm">
+  <div class="md:col-span-2">
+    <label class="block text-xs text-gray-500 mb-1">Поиск</label>
+    <input type="text" name="q" value="{{ filter_q }}" placeholder="Номер счёта, заказа или клиент"
+      class="w-full rounded-md border border-gray-300 px-3 py-2">
+  </div>
+  <div>
+    <label class="block text-xs text-gray-500 mb-1">Оплата</label>
+    <select name="paid" class="w-full rounded-md border border-gray-300 px-3 py-2">
+      <option value="">— все —</option>
+      <option value="yes" {% if filter_paid == 'yes' %}selected{% endif %}>Оплачено</option>
+      <option value="no" {% if filter_paid == 'no' %}selected{% endif %}>Не оплачено</option>
+    </select>
+  </div>
+  <div class="flex items-end">
+    <button class="w-full px-4 py-2 rounded-md bg-gray-900 text-white">Фильтр</button>
+  </div>
+</form>
+
+<div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+  <div class="px-4 py-3 border-b border-gray-200 text-sm text-gray-600">Найдено: <b>{{ total }}</b></div>
+  <table class="w-full text-sm">
+    <thead class="bg-gray-50 text-xs uppercase text-gray-500">
+      <tr>
+        <th class="px-4 py-2 text-left">Счёт</th>
+        <th class="px-4 py-2 text-left">Заказ</th>
+        <th class="px-4 py-2 text-left">Клиент</th>
+        <th class="px-4 py-2 text-right">Сумма</th>
+        <th class="px-4 py-2 text-left">Статус</th>
+        <th class="px-4 py-2 text-left">Выставлен</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-gray-100">
+      {% for inv in invoices %}
+      <tr class="hover:bg-gray-50">
+        <td class="px-4 py-2"><a href="{% url 'billing:detail' inv.pk %}" class="text-brand-600 hover:underline font-medium">{{ inv.invoice_number }}</a></td>
+        <td class="px-4 py-2"><a href="{% url 'workorders:detail' inv.workorder.pk %}" class="text-gray-700 hover:underline">{{ inv.workorder.order_number }}</a></td>
+        <td class="px-4 py-2">{{ inv.workorder.vehicle.customer.name }}</td>
+        <td class="px-4 py-2 text-right font-medium">{{ inv.total|floatformat:2 }}</td>
+        <td class="px-4 py-2"><span class="inline-flex px-2 py-0.5 rounded text-xs font-medium {{ inv.status_badge_class }}">{{ inv.status_label }}</span></td>
+        <td class="px-4 py-2 text-gray-500 text-xs">{{ inv.issued_at|date:"d.m.Y" }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="6" class="px-4 py-8 text-center text-gray-500">Счета не найдены</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

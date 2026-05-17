@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block title %}Маршрут #{{ route.pk }}{% endblock %}
+{% block content %}
+<div class="flex items-center justify-between mb-4">
+  <h1 class="text-2xl font-extrabold flex items-center gap-2"><i data-lucide="truck" class="w-7 h-7 text-cyan-700"></i> Маршрут #{{ route.pk }}</h1>
+  <a href="{% url 'delivery:list' %}" class="btn btn-ghost"><i data-lucide="arrow-left" class="w-4 h-4"></i> К списку</a>
+</div>
+
+<div class="card mb-4">
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-3 text-sm">
+    <div><div class="text-xs uppercase text-slate-500">Дата</div><div class="font-bold">{{ route.date|date:"d.m.Y" }}</div></div>
+    <div><div class="text-xs uppercase text-slate-500">Водитель</div><div class="font-bold">{{ route.driver.display_name }}</div></div>
+    <div><div class="text-xs uppercase text-slate-500">Статус</div><div><span class="chip bg-cyan-100 text-cyan-800">{{ route.get_status_display }}</span></div></div>
+    <div><div class="text-xs uppercase text-slate-500">Заданий</div><div class="font-bold">{{ assignments.count }}</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <h2 class="font-bold mb-3">Задания доставки</h2>
+  <table class="w-full text-sm">
+    <thead>
+      <tr class="text-left text-xs uppercase text-slate-500 border-b">
+        <th class="py-2">№</th><th>Квитанция</th><th>Клиент</th><th>Адрес</th><th>Окно</th><th>Статус</th><th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for a in assignments %}
+      {% include 'partials/delivery_row.html' %}
+      {% empty %}
+      <tr><td colspan="7" class="py-6 text-center text-slate-400">Нет заданий</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

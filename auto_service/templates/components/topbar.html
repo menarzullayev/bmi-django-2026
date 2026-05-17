@@ -1,0 +1,15 @@
+<header class="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between sticky top-0 z-10">
+  <div>
+    <h1 class="text-xl font-semibold text-gray-900">{{ page_title|default:'Панель управления' }}</h1>
+    {% if breadcrumb %}
+      <div class="text-xs text-gray-500 mt-0.5">{{ breadcrumb }}</div>
+    {% endif %}
+  </div>
+  <div class="flex items-center gap-4">
+    {% block topbar_actions %}{% endblock %}
+    <div class="hidden md:flex flex-col items-end text-right">
+      <span class="text-xs text-gray-500">Сегодня</span>
+      <span class="text-sm font-medium text-gray-800">{% now "d.m.Y, H:i" %}</span>
+    </div>
+  </div>
+</header>
